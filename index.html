@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Side Items By Agent - شركة نايف للأغذية</title>
+<link rel="icon" href="https://i.postimg.cc/NM2zJWZD/NAIF-LOGO.jpg" type="image/jpeg">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+
+<style>
+    :root{
+        --red:#C8102E;
+        --red-dark:#9B0C23;
+        --ink:#1f2937;
+        --muted:#6b7280;
+        --line:#e5e7eb;
+        --bg:#f4f5f7;
+    }
+    *{box-sizing:border-box;}
+    body{
+        margin:0;
+        background:var(--bg);
+        color:var(--ink);
+        font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        direction:rtl;
+        padding:24px 16px 130px;
+        -webkit-font-smoothing:antialiased;
+    }
+
+    /* ============ شريط الأدوات ============ */
+    .toolbar{
+        max-width:900px; margin:0 auto 18px;
+        display:flex; flex-wrap:wrap; align-items:center; gap:10px;
+    }
+    .btn, .file-btn{
+        display:inline-flex; align-items:center; gap:8px;
+        border:none; border-radius:9px; cursor:pointer;
+        padding:11px 20px; font-size:.85rem; font-weight:700;
+        font-family:inherit; transition:.22s ease;
+        box-shadow:0 4px 12px rgba(0,0,0,.08);
+    }
+    .btn:disabled{opacity:.55; cursor:not-allowed;}
+    .file-btn{background:var(--red); color:#fff;}
+    .file-btn:hover{background:var(--red-dark); transform:translateY(-1px);}
+    .btn-pdf{background:#1f2937; color:#fff;}
+    .btn-pdf:hover{background:#111827; transform:translateY(-1px);}
+    .btn-xls{background:#107C41; color:#fff;}
+    .btn-xls:hover{background:#0c5e31; transform:translateY(-1px);}
+    .file-name{
+        font-size:.78rem; color:var(--muted);
+        background:#fff; border:1px dashed var(--line);
+        padding:9px 14px; border-radius:9px;
+    }
+
+    /* ============ بطاقة التقرير ============ */
+    .report{
+        max-width:900px; margin:0 auto; background:#fff;
+        border:1px solid #eceef1; border-radius:14px;
+        box-shadow:0 10px 30px rgba(0,0,0,.07);
+        padding:28px 30px 30px;
+    }
+    .report-head{
+        display:flex; justify-content:space-between; align-items:flex-start;
+        gap:20px; padding-bottom:16px; border-bottom:3px solid var(--red);
+    }
+    .brand{display:flex; align-items:center; gap:14px;}
+    .brand img{
+        width:66px; height:66px; object-fit:contain;
+        border:1px solid #eee; border-radius:10px; background:#fff; padding:4px;
+    }
+    .brand h1{margin:0; font-size:1.15rem; color:var(--red); font-weight:800;}
+    .brand p{margin:4px 0 0; font-size:.78rem; color:var(--muted); direction:ltr; letter-spacing:.4px;}
+
+    .meta{text-align:left; direction:ltr; font-size:.76rem; color:var(--muted); line-height:1.75;}
+    .meta .title{font-size:1rem; font-weight:800; color:var(--ink); margin-bottom:3px;}
+
+    /* ============ البطاقات الإحصائية ============ */
+    .stats{display:flex; gap:12px; flex-wrap:wrap; margin:18px 0 4px;}
+    .stat{
+        flex:1 1 140px; background:#fafbfc;
+        border:1px solid var(--line); border-radius:10px; padding:11px 15px;
+    }
+    .stat .label{font-size:.72rem; color:var(--muted); margin-bottom:5px;}
+    .stat .value{font-size:1.18rem; font-weight:800; color:var(--red); direction:ltr;}
+
+    /* ============ الجدول ============ */
+    table{width:100%; border-collapse:collapse; margin-top:18px; font-size:.86rem;}
+    thead th{
+        background:var(--red); color:#fff; padding:12px;
+        font-weight:700; font-size:.8rem; text-align:center;
+        border-left:1px solid rgba(255,255,255,.15);
+    }
+    thead th:first-child{border-left:none;}
+    thead th.col-name{text-align:right;}
+    tbody td{padding:11px 12px; border-bottom:1px solid var(--line); text-align:center;}
+    tbody td.col-name{text-align:right; font-weight:700;}
+    tbody tr:nth-child(even){background:#fbfbfc;}
+    tbody tr:hover{background:#fdf1f3;}
+    .num{direction:ltr; font-variant-numeric:tabular-nums;}
+    tbody td.strong{font-weight:800; color:var(--red);}
+    tfoot td{
+        padding:12px; background:#fdecef; font-weight:800; text-align:center;
+        color:var(--red-dark); border-top:2px solid var(--red); direction:ltr;
+    }
+    tfoot td.col-name{text-align:right; direction:rtl;}
+
+    .footnote{
+        margin-top:16px; font-size:.72rem; color:var(--muted);
+        border-top:1px dashed var(--line); padding-top:10px; line-height:1.8;
+    }
+    .warn{
+        margin-top:14px; padding:10px 14px; border-radius:9px;
+        background:#fff7ed; border:1px solid #fed7aa;
+        color:#9a3412; font-size:.78rem; font-weight:600;
+    }
+
+    /* ============ حالة عدم وجود بيانات ============ */
+    .empty{
+        text-align:center; padding:55px 20px; color:var(--muted); font-size:.9rem;
+    }
+    .empty b{display:block; color:var(--ink); font-size:1rem; margin-bottom:8px;}
+
+    /* ============ توقيع المطور (إطار أحمر فقط - أصغر 25%) ============ */
+    .signature-card{
+        position:fixed;
+        bottom:20px;
+        left:20px;
+        background:#ffffff;
+        color:#C8102E;
+        border:1.5px solid #C8102E;
+        border-radius:6.375px;
+        padding:7.875px 13.125px;
+        font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-size:0.6rem;
+        font-weight:600;
+        z-index:1000;
+        transition:all .25s ease;
+        cursor:pointer;
+        text-decoration:none;
+        display:inline-block;
+        box-shadow:0 4px 14px rgba(200,16,46,.12);
+    }
+    .signature-card:hover{
+        transform:scale(1.04);
+        box-shadow:0 8px 20px rgba(200,16,46,.22);
+    }
+    .signature-card .name{
+        font-size:0.7125rem;
+        font-weight:700;
+        margin-bottom:3.75px;
+    }
+    .signature-card .title{
+        font-size:0.525rem;
+        opacity:.9;
+        font-weight:500;
+    }
+
+    @media (max-width:768px){
+        .signature-card{
+            position:relative; bottom:auto; left:auto;
+            margin:24px auto 0; width:fit-content;
+        }
+        .signature-card:hover{transform:none;}
+        .report{padding:20px 16px;}
+        .report-head{flex-direction:column;}
+        .meta{text-align:right; direction:ltr;}
+    }
+
+    @media print{
+        body{background:#fff; padding:0;}
+        .toolbar, .signature-card{display:none !important;}
+        .report{box-shadow:none; border:none; max-width:100%;}
+    }
+</style>
+</head>
+<body>
+
+<!-- ===== شريط الأدوات ===== -->
+<div class="toolbar">
+    <label class="file-btn">
+        📂 تحميل ملف Excel (xlsx / xlsm)
+        <input type="file" id="fileInput" accept=".xlsx,.xlsm" hidden>
+    </label>
+    <button id="btnPdf" class="btn btn-pdf">📄 تصدير PDF</button>
+    <button id="btnXlsx" class="btn btn-xls">📊 تصدير Excel</button>
+    <span class="file-name" id="fileName">لم يتم تحميل أي ملف</span>
+</div>
+
+<!-- ===== منطقة التقرير ===== -->
+<div class="report" id="reportArea">
+
+    <div class="report-head">
+        <div class="brand">
+            <img id="logo" src="https://i.postimg.cc/NM2zJWZD/NAIF-LOGO.jpg"
+                 crossorigin="anonymous" alt="Naif Foods">
+            <div>
+                <h1>شركة نايف للأغذية</h1>
+                <p id="branchText">Kuwait - Naif Chicken</p>
+            </div>
+        </div>
+        <div class="meta">
+            <div class="title">Side Items By Agent</div>
+            <div>Operator: ALL</div>
+            <div>Subgroup: Appetizeer___Z</div>
+            <div id="periodText">From — to —</div>
+            <div id="printedText"></div>
+        </div>
+    </div>
+
+    <div class="stats" id="stats" style="display:none;"></div>
+
+    <div class="empty" id="emptyState">
+        <b>لا توجد بيانات لعرضها</b>
+        قم بتحميل ملف Excel (xlsx / xlsm) لعرض التقرير المختصر.
+    </div>
+
+    <table id="reportTable" style="display:none;">
+        <thead></thead>
+        <tbody></tbody>
+        <tfoot></tfoot>
+    </table>
+
+    <div class="warn" id="warnBox" style="display:none;"></div>
+
+    <div class="footnote" id="footnote" style="display:none;">
+        الأرقام تمثل عدد الوجبات الجانبية لكل موظف حسب الوجبات المحددة فقط.
+    </div>
+</div>
+
+<!-- ===== توقيع المطور ===== -->
+<a href="https://yasser-q8.github.io/myprofile/#" class="signature-card" target="_blank" rel="noopener noreferrer">
+    <div class="name">Yasser Elkhateeb</div>
+    <div class="title">مطور البرنامج 67011143</div>
+</a>
+
+<script>
+/* =========================================================
+   الإعدادات — الموظفون والوجبات المطلوبة (قابلة للتعديل)
+   ========================================================= */
+const TARGET_EMPLOYEES = [
+    'abdalrahman ahmed mohamed',
+    'Ahmad Mahmoud Reyadh'
+];
+const TARGET_ITEMS = [
+    '- 7 up -',
+    '- pepsi -'
+];
+
+/* الحالة العامة */
+const state = {
+    items: [],
+    rows: [],
+    totals: {},
+    grandTotal: 0,
+    period: ''
+};
+
+/* =========================================================
+   أدوات مساعدة
+   ========================================================= */
+function normalize(v){
+    return String(v ?? '')
+        .replace(/\u00A0/g, ' ')
+        .trim()
+        .replace(/^[-–—•\s$]+/, '')
+        .replace(/[-–—•\s]+$/, '')
+        .replace(/\s+/g, ' ')
+        .toLowerCase();
+}
+
+function compact(v){
+    return normalize(v).replace(/[\s\-_]+/g, '');
+}
+
+function prettyItem(it){
+    return normalize(it)
+        .split(' ')
+        .map(w => (w && isNaN(w)) ? w.charAt(0).toUpperCase() + w.slice(1) : w)
+        .join(' ');
+}
+
+function toNum(v){
+    if (v === null || v === undefined || v === '') return 0;
+    const n = Number(String(v).replace(/,/g, '').trim());
+    return isNaN(n) ? 0 : n;
+}
+
+function fmt(n){
+    return Number(n || 0).toLocaleString('en-US');
+}
+
+function esc(s){
+    return String(s).replace(/[&<>"']/g, c => (
+        {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
+    ));
+}
+
+function dateStamp(){
+    const d = new Date();
+    const p = x => String(x).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
+}
+
+function isDateLike(v){
+    if (v instanceof Date) return true;
+    const s = String(v).trim();
+    if (!s) return false;
+    if (/^\d{1,4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,4}/.test(s)) return true;
+    if (/^\d{1,2}[\s\-][A-Za-z]{3,}[\s\-]\d{4}/.test(s)) return true;
+    if (/^[A-Za-z]{3,}\s+\d{1,2},?\s+\d{4}/.test(s)) return true;
+    return false;
+}
+
+/* =========================================================
+   مطابقة أسماء الموظفين (كلمة بكلمة)
+   ========================================================= */
+function nameMatches(cellValue, target){
+    const n = normalize(cellValue);
+    const t = normalize(target);
+    if (!n || !t) return false;
+    if (n === t) return true;
+
+    const nWords = n.split(' ').filter(Boolean);
+    const tWords = t.split(' ').filter(Boolean);
+    if (!nWords.length || !tWords.length) return false;
+
+    if (tWords.every(w => nWords.includes(w))) return true;
+    if (nWords.every(w => tWords.includes(w))) return true;
+    return false;
+}
+
+/* =========================================================
+   البحث عن أعمدة الوجبات في صف معيّن
+   (مطابقة تامة ثم مطابقة مضغوطة — بدون مطابقة جزئية
+    لتجنب الخلط بين "pepsi" و "diet pepsi")
+   ========================================================= */
+function findItemColumns(row){
+    const res = {};
+    const norm = row.map(cell => normalize(cell));
+    const comp = norm.map(n => n.replace(/[\s\-_]+/g, ''));
+
+    TARGET_ITEMS.forEach(it => {
+        const t  = normalize(it);
+        const tc = t.replace(/[\s\-_]+/g, '');
+
+        let idx = norm.findIndex(n => n && n === t);
+        if (idx !== -1) { res[it] = idx; return; }
+
+        idx = comp.findIndex(n => n && n === tc);
+        if (idx !== -1) { res[it] = idx; }
+    });
+    return res;
+}
+
+/* =========================================================
+   إيجاد صف العناوين (الصف الذي يحتوي على أكبر عدد من الوجبات)
+   ========================================================= */
+function findHeaderRow(rows){
+    let best = { idx: -1, cols: {}, score: 0 };
+    for (let r = 0; r < rows.length; r++){
+        const cols = findItemColumns(rows[r] || []);
+        const score = Object.keys(cols).length;
+        if (score > best.score){
+            best = { idx: r, cols, score };
+        }
+        if (score === TARGET_ITEMS.length) break;
+    }
+    return best;
+}
+
+/* =========================================================
+   تحديد عمود أسماء الموظفين تلقائياً
+   (يفضّل العمود الذي يحتوي على أسماء الموظفين المطلوبين)
+   ========================================================= */
+function detectNameColumn(rows, headerRowIdx, itemCols){
+    const used = new Set(Object.values(itemCols));
+    const maxCols = Math.max(...rows.map(r => (r ? r.length : 0)), 0);
+
+    let best = -1, bestScore = -Infinity;
+    let bestTargetCol = -1, bestTargetHits = 0;
+
+    for (let c = 0; c < maxCols; c++){
+        if (used.has(c)) continue;
+
+        let textCount = 0, totalCount = 0, totalLen = 0;
+        const uniqueTexts = new Set();
+        let targetHits = 0;
+
+        for (let r = headerRowIdx + 1; r < rows.length; r++){
+            const v = rows[r] ? rows[r][c] : '';
+            if (v === '' || v === null || v === undefined) continue;
+
+            const s = String(v).trim();
+            if (!s) continue;
+            totalCount++;
+
+            if (isDateLike(v)) continue;
+            const lower = s.toLowerCase();
+            if (lower === 'total' || lower === 'grand total' || lower.startsWith('total ')) continue;
+            if (!isNaN(Number(s))) continue;
+
+            textCount++;
+            totalLen += s.length;
+            uniqueTexts.add(lower);
+
+            for (const target of TARGET_EMPLOYEES){
+                if (nameMatches(s, target)) targetHits++;
+            }
+        }
+
+        if (targetHits > bestTargetHits){
+            bestTargetHits = targetHits;
+            bestTargetCol = c;
+        }
+
+        if (textCount === 0) continue;
+        const textRatio = textCount / totalCount;
+        if (textRatio < 0.4) continue;
+
+        const avgLen = totalLen / textCount;
+        const score = uniqueTexts.size * 10 + avgLen * 3;
+        if (score > bestScore){ bestScore = score; best = c; }
+    }
+
+    if (bestTargetCol !== -1) return bestTargetCol;
+    return best;
+}
+
+/* =========================================================
+   بناء التقرير من صفوف الشيت
+   ========================================================= */
+function buildReport(rows){
+    // --- 1) صف العناوين ---
+    const header = findHeaderRow(rows);
+    if (header.idx === -1 || header.score === 0){
+        throw new Error('لم يتم العثور على أعمدة الوجبات المطلوبة (7 up / pepsi) داخل الملف.');
+    }
+    const itemCols = header.cols;
+
+    // --- 2) عمود الأسماء ---
+    const nameCol = detectNameColumn(rows, header.idx, itemCols);
+    if (nameCol === -1){
+        throw new Error('لم يتم العثور على عمود أسماء الموظفين داخل الملف.');
+    }
+
+    // --- 3) تجميع بيانات الموظفين المطلوبين ---
+    const agg = TARGET_EMPLOYEES.map(name => ({
+        requested: name,
+        display: name,
+        matched: false,
+        values: {}
+    }));
+
+    for (let r = header.idx + 1; r < rows.length; r++){
+        const row = rows[r];
+        if (!row) continue;
+
+        const rawName = row[nameCol];
+        if (rawName === undefined || rawName === null || rawName === '') continue;
+
+        const s = String(rawName).trim();
+        const lower = s.toLowerCase();
+        if (lower === 'total' || lower === 'grand total') continue;
+
+        // البحث عن الموظف المطابق
+        let matchIdx = -1;
+        for (let i = 0; i < TARGET_EMPLOYEES.length; i++){
+            if (nameMatches(s, TARGET_EMPLOYEES[i])){ matchIdx = i; break; }
+        }
+        if (matchIdx === -1) continue;
+
+        const item = agg[matchIdx];
+        if (!item.matched){
+            item.matched = true;
+            item.display = s;
+        }
+
+        TARGET_ITEMS.forEach(it => {
+            const c = itemCols[it];
+            if (c === undefined) return;
+            item.values[it] = (item.values[it] || 0) + toNum(row[c]);
+        });
+    }
+
+    const anyMatched = agg.some(a => a.matched);
+    if (!anyMatched){
+        throw new Error('لم يتم العثور على أي من الموظفين المطلوبين في الملف. تأكد من أسماء الموظفين أو جرّب ملفاً آخر.');
+    }
+
+    // --- 4) حساب الإجماليات ---
+    const foundItems = TARGET_ITEMS.filter(it => itemCols[it] !== undefined);
+    const totals = {};
+    foundItems.forEach(it => totals[it] = 0);
+
+    const outRows = agg.map(item => {
+        let total = 0;
+        foundItems.forEach(it => {
+            const v = item.values[it] || 0;
+            totals[it] += v;
+            total += v;
+        });
+        return {
+            display: item.display,
+            matched: item.matched,
+            values: item.values,
+            total
+        };
+    });
+
+    const grandTotal = foundItems.reduce((s, it) => s + totals[it], 0);
+
+    // --- 5) استخراج الفترة والفرع ---
+    let period = '', branch = '';
+    for (const row of rows){
+        if (!row) continue;
+        for (const cell of row){
+            if (typeof cell !== 'string') continue;
+            if (!period && /from\s+.+\s+to\s+/i.test(cell)) period = cell.trim();
+            if (!branch && /naif\s*chicken/i.test(cell)) branch = cell.trim();
+        }
+    }
+
+    state.items = TARGET_ITEMS.map(it => ({
+        key: it,
+        pretty: prettyItem(it),
+        found: itemCols[it] !== undefined
+    }));
+    state.rows = outRows;
+    state.totals = totals;
+    state.grandTotal = grandTotal;
+    state.period = period;
+
+    if (period) document.getElementById('periodText').textContent = period;
+    if (branch) document.getElementById('branchText').textContent = branch;
+}
+
+/* =========================================================
+   عرض التقرير
+   ========================================================= */
+function render(){
+    const foundItems = state.items.filter(it => it.found);
+    const missingItems = state.items.filter(it => !it.found);
+
+    // رأس الجدول
+    const thead = document.querySelector('#reportTable thead');
+    thead.innerHTML = `
+        <tr>
+            <th class="col-name">Employee</th>
+            ${foundItems.map(it => `<th>${esc(it.pretty)}</th>`).join('')}
+            <th>Total</th>
+        </tr>`;
+
+    // الصفوف
+    const tbody = document.querySelector('#reportTable tbody');
+    tbody.innerHTML = state.rows.map(r => `
+        <tr>
+            <td class="col-name">${esc(r.display)}</td>
+            ${foundItems.map(it => `<td class="num">${fmt(r.values[it.key] || 0)}</td>`).join('')}
+            <td class="num strong">${fmt(r.total)}</td>
+        </tr>`).join('');
+
+    // الإجمالي
+    const tfoot = document.querySelector('#reportTable tfoot');
+    tfoot.innerHTML = `
+        <tr>
+            <td class="col-name">Total</td>
+            ${foundItems.map(it => `<td class="num">${fmt(state.totals[it.key] || 0)}</td>`).join('')}
+            <td class="num">${fmt(state.grandTotal)}</td>
+        </tr>`;
+
+    // البطاقات الإحصائية
+    const stats = document.getElementById('stats');
+    stats.innerHTML = `
+        <div class="stat">
+            <div class="label">عدد الموظفين</div>
+            <div class="value">${fmt(state.rows.length)}</div>
+        </div>
+        ${foundItems.map(it => `
+        <div class="stat">
+            <div class="label">${esc(it.pretty)}</div>
+            <div class="value">${fmt(state.totals[it.key] || 0)}</div>
+        </div>`).join('')}
+        <div class="stat">
+            <div class="label">الإجمالي العام</div>
+            <div class="value">${fmt(state.grandTotal)}</div>
+        </div>`;
+    stats.style.display = 'flex';
+
+    // تحذير الوجبات المفقودة
+    const warn = document.getElementById('warnBox');
+    if (missingItems.length){
+        warn.style.display = 'block';
+        warn.textContent = 'تنبيه: لم يتم العثور على الوجبات التالية داخل الملف: ' +
+            missingItems.map(it => it.pretty).join('، ');
+    } else {
+        warn.style.display = 'none';
+    }
+
+    // التاريخ
+    document.getElementById('printedText').textContent = 'Printed: ' + dateStamp();
+
+    // إظهار الجدول
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('reportTable').style.display = 'table';
+    document.getElementById('footnote').style.display = 'block';
+}
+
+/* =========================================================
+   تحميل ملف Excel (يبحث في كل الشيتات عن الأفضل)
+   ========================================================= */
+async function loadFile(file){
+    try{
+        document.getElementById('fileName').textContent = file.name;
+
+        const buffer = await file.arrayBuffer();
+        const wb = XLSX.read(buffer, { type: 'array' });
+
+        let bestSheet = null;
+
+        for (const sheetName of wb.SheetNames){
+            const ws = wb.Sheets[sheetName];
+            const rows = XLSX.utils.sheet_to_json(ws, {
+                header: 1, raw: true, defval: '', blankrows: true
+            });
+            const header = findHeaderRow(rows);
+            if (!bestSheet || header.score > bestSheet.header.score){
+                bestSheet = { name: sheetName, rows, header };
+            }
+            if (header.score === TARGET_ITEMS.length) break;
+        }
+
+        if (!bestSheet || bestSheet.header.score === 0){
+            throw new Error('لم يتم العثور على أعمدة الوجبات المطلوبة (7 up / pepsi) في أي شيت داخل الملف.');
+        }
+
+        buildReport(bestSheet.rows);
+        render();
+
+    }catch(err){
+        console.error(err);
+        alert('تعذر قراءة الملف:\n' + err.message);
+    }
+}
+
+/* =========================================================
+   تصدير PDF
+   ========================================================= */
+async function exportPDF(){
+    if (!state.rows.length){
+        alert('الرجاء تحميل ملف Excel أولاً.');
+        return;
+    }
+
+    const btn = document.getElementById('btnPdf');
+    btn.disabled = true;
+    btn.textContent = '⏳ جاري التصدير...';
+
+    const el = document.getElementById('reportArea');
+    const prevShadow = el.style.boxShadow;
+    const prevRadius = el.style.borderRadius;
+    el.style.boxShadow = 'none';
+    el.style.borderRadius = '0';
+
+    try{
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'pt', 'a4');
+
+        const canvas = await html2canvas(el, {
+            scale: 2,
+            backgroundColor: '#ffffff',
+            useCORS: true
+        });
+
+        const imgData = canvas.toDataURL('image/jpeg', 0.98);
+        const pdfW = pdf.internal.pageSize.getWidth();
+        const pdfH = pdf.internal.pageSize.getHeight();
+        const imgH = (canvas.height * pdfW) / canvas.width;
+
+        let heightLeft = imgH;
+        let position = 0;
+
+        pdf.addImage(imgData, 'JPEG', 0, position, pdfW, imgH);
+        heightLeft -= pdfH;
+
+        while (heightLeft > 0){
+            position = heightLeft - imgH;
+            pdf.addPage();
+            pdf.addImage(imgData, 'JPEG', 0, position, pdfW, imgH);
+            heightLeft -= pdfH;
+        }
+
+        pdf.save(`Side_Items_By_Agent_${dateStamp()}.pdf`);
+
+    }catch(err){
+        console.error(err);
+        alert('حدث خطأ أثناء تصدير PDF:\n' + err.message);
+    }finally{
+        el.style.boxShadow = prevShadow;
+        el.style.borderRadius = prevRadius;
+        btn.disabled = false;
+        btn.textContent = '📄 تصدير PDF';
+    }
+}
+
+/* =========================================================
+   تصدير Excel
+   ========================================================= */
+function exportXLSX(){
+    if (!state.rows.length){
+        alert('الرجاء تحميل ملف Excel أولاً.');
+        return;
+    }
+
+    const foundItems = state.items.filter(it => it.found);
+
+    const aoa = [
+        ['شركة نايف للأغذية'],
+        ['Side Items By Agent'],
+        ['Operator', 'ALL'],
+        ['Subgroup', 'Appetizeer___Z'],
+        ['Period', state.period || ''],
+        ['Printed', dateStamp()],
+        [],
+        ['Employee', ...foundItems.map(it => it.pretty), 'Total'],
+        ...state.rows.map(r => [
+            r.display,
+            ...foundItems.map(it => r.values[it.key] || 0),
+            r.total
+        ]),
+        ['Total', ...foundItems.map(it => state.totals[it.key] || 0), state.grandTotal]
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = [
+        { wch: 30 },
+        ...foundItems.map(() => ({ wch: 14 })),
+        { wch: 12 }
+    ];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'SideItems');
+    XLSX.writeFile(wb, `Side_Items_By_Agent_${dateStamp()}.xlsx`);
+}
+
+/* =========================================================
+   ربط الأحداث
+   ========================================================= */
+document.getElementById('fileInput').addEventListener('change', e => {
+    const f = e.target.files && e.target.files[0];
+    if (f) loadFile(f);
+});
+
+document.getElementById('btnPdf').addEventListener('click', exportPDF);
+document.getElementById('btnXlsx').addEventListener('click', exportXLSX);
+
+document.getElementById('logo').addEventListener('error', function(){
+    this.style.display = 'none';
+});
+
+document.getElementById('printedText').textContent = 'Printed: ' + dateStamp();
+</script>
+</body>
+</html>
