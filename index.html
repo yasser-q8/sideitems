@@ -55,6 +55,34 @@
         padding:9px 14px; border-radius:9px;
     }
 
+    /* ★ مجموعة تصفية الأصناف */
+    .filter-group{
+        display:inline-flex;
+        background:#fff;
+        border:1px solid var(--line);
+        border-radius:9px;
+        overflow:hidden;
+        box-shadow:0 2px 6px rgba(0,0,0,.05);
+    }
+    .filter-group label{
+        padding:9px 14px;
+        font-size:.78rem;
+        font-weight:700;
+        cursor:pointer;
+        color:var(--muted);
+        transition:all .18s ease;
+        display:flex;
+        align-items:center;
+        gap:6px;
+        user-select:none;
+    }
+    .filter-group label:not(:last-child){ border-left:1px solid var(--line); }
+    .filter-group input{ display:none; }
+    .filter-group label.active{
+        background:var(--red);
+        color:#fff;
+    }
+
     /* ============ بطاقة التقرير ============ */
     .report{
         max-width:900px; margin:0 auto; background:#fff;
@@ -239,9 +267,7 @@
         border:none;
         border-radius:0;
     }
-    .report.pdf-mode table.report-table{
-        font-size:0.55rem;
-    }
+    .report.pdf-mode table.report-table{ font-size:0.55rem; }
     .report.pdf-mode table.report-table thead th{
         font-size:0.5rem;
         padding:4px 2px;
@@ -282,11 +308,11 @@
         max-width:140px;
     }
 
-    /* ★ إخفاء كروت المجاميع وأسطر البيانات الوصفية في وضع PDF */
+    /* إخفاء كروت المجاميع وأسطر البيانات الوصفية في وضع PDF */
     .report.pdf-mode .stats{ display:none !important; }
     .report.pdf-mode .meta-line{ display:none !important; }
 
-    /* ============ توقيع المطور (إطار أحمر فقط - أصغر 25%) ============ */
+    /* ============ توقيع المطور ============ */
     .signature-card{
         position:fixed;
         bottom:20px;
@@ -350,6 +376,19 @@
     </label>
     <button id="btnPdf" class="btn btn-pdf">📄 تصدير PDF (أفقي)</button>
     <button id="btnXlsx" class="btn btn-xls">📊 تصدير Excel</button>
+
+    <!-- ★ تصفية الأصناف -->
+    <div class="filter-group" role="group" aria-label="تصفية الأصناف">
+        <label class="active">
+            <input type="radio" name="itemFilter" value="all" checked>
+            كل الأصناف
+        </label>
+        <label>
+            <input type="radio" name="itemFilter" value="active">
+            الأصناف التي فيها حركة
+        </label>
+    </div>
+
     <span class="file-name" id="fileName">لم يتم تحميل أي ملف</span>
 </div>
 
@@ -464,7 +503,7 @@ function loadLogo(){
 }
 
 /* =========================================================
-   الأصناف (36) — من ملف الأصناف المرفق
+   الأصناف (36)
    ========================================================= */
 const ITEMS = [
     'Cheesy Fries',
@@ -546,8 +585,12 @@ const state = {
     period: '',
     branch: '',
     missingItems: [],
-    missingEmployees: []
+    missingEmployees: [],
+    filterMode: 'all'   // ★ 'all' أو 'active'
 };
+
+/* النص الأصلي للحالة الفارغة — يُستعاد عند تبديل الفلتر */
+const EMPTY_HTML_DEFAULT = document.getElementById('emptyState').innerHTML;
 
 /* =========================================================
    أدوات مساعدة
@@ -570,11 +613,6 @@ function toNum(v){
 
 function fmt(n){
     return Number(n || 0).toLocaleString('en-US');
-}
-
-function cellText(v){
-    const n = Number(v || 0);
-    return n ? fmt(n) : '-';
 }
 
 function isZero(v){
@@ -601,6 +639,14 @@ function isDateLike(v){
     if (/^\d{1,2}[\s\-][A-Za-z]{3,}[\s\-]\d{4}/.test(s)) return true;
     if (/^[A-Za-z]{3,}\s+\d{1,2},?\s+\d{4}/.test(s)) return true;
     return false;
+}
+
+/* ★ قائمة الأصناف المراد عرضها وفق الفلتر الحالي */
+function getVisibleItems(){
+    if (state.filterMode === 'active'){
+        return ITEMS.filter(it => (state.itemTotals[it] || 0) > 0);
+    }
+    return ITEMS;
 }
 
 /* =========================================================
@@ -652,7 +698,7 @@ function findBestEmployeeMatch(cellValue){
 }
 
 /* =========================================================
-   البحث عن أعمدة الأصناف في صف معيّن
+   البحث عن أعمدة الأصناف
    ========================================================= */
 function findItemColumns(row){
     const res = {};
@@ -828,13 +874,43 @@ function buildReport(rows){
 }
 
 /* =========================================================
-   عرض التقرير
+   عرض التقرير (يستخدم getVisibleItems حسب الفلتر)
    ========================================================= */
 function render(){
     const thead = document.querySelector('#reportTable thead');
     const tbody = document.querySelector('#reportTable tbody');
     const tfoot = document.querySelector('#reportTable tfoot');
+    const emptyEl = document.getElementById('emptyState');
+    const tableWrap = document.getElementById('tableWrap');
+    const stats = document.getElementById('stats');
+    const warn = document.getElementById('warnBox');
+    const footnote = document.getElementById('footnote');
 
+    /* لا يوجد ملف محمّل */
+    if (!state.matrix || Object.keys(state.matrix).length === 0){
+        emptyEl.innerHTML = EMPTY_HTML_DEFAULT;
+        emptyEl.style.display = 'block';
+        tableWrap.style.display = 'none';
+        stats.style.display = 'none';
+        warn.style.display = 'none';
+        footnote.style.display = 'none';
+        return;
+    }
+
+    const visibleItems = getVisibleItems();
+
+    /* فلتر "الحركة" مع عدم وجود أي صنف متحرك */
+    if (visibleItems.length === 0){
+        emptyEl.innerHTML = '<b>لا توجد أصناف بها حركة</b>جميع الأصناف قيمتها صفر. اختر "كل الأصناف" لعرض الجميع.';
+        emptyEl.style.display = 'block';
+        tableWrap.style.display = 'none';
+        stats.style.display = 'none';
+        warn.style.display = 'none';
+        footnote.style.display = 'none';
+        return;
+    }
+
+    /* رأس الجدول */
     thead.innerHTML = `
         <tr>
             <th class="item-header">Item \\ Employee</th>
@@ -842,7 +918,8 @@ function render(){
             <th class="total-header">Total</th>
         </tr>`;
 
-    tbody.innerHTML = ITEMS.map(item => {
+    /* جسم الجدول */
+    tbody.innerHTML = visibleItems.map(item => {
         const rowVals = EMPLOYEES.map(emp => {
             const v = state.matrix[item][emp] || 0;
             return isZero(v)
@@ -863,6 +940,7 @@ function render(){
             </tr>`;
     }).join('');
 
+    /* صف الإجمالي */
     tfoot.innerHTML = `
         <tr>
             <td class="item-name">Total</td>
@@ -873,17 +951,15 @@ function render(){
             <td>${isZero(state.grandTotal) ? '-' : fmt(state.grandTotal)}</td>
         </tr>`;
 
-    const stats = document.getElementById('stats');
-    const itemsFound = ITEMS.length - state.missingItems.length;
-    const empsFound = EMPLOYEES.length - state.missingEmployees.length;
+    /* البطاقات الإحصائية */
     stats.innerHTML = `
         <div class="stat">
-            <div class="label">الأصناف</div>
-            <div class="value">${fmt(itemsFound)} / ${fmt(ITEMS.length)}</div>
+            <div class="label">الأصناف المعروضة</div>
+            <div class="value">${fmt(visibleItems.length)} / ${fmt(ITEMS.length)}</div>
         </div>
         <div class="stat">
             <div class="label">الموظفون</div>
-            <div class="value">${fmt(empsFound)} / ${fmt(EMPLOYEES.length)}</div>
+            <div class="value">${fmt(EMPLOYEES.length - state.missingEmployees.length)} / ${fmt(EMPLOYEES.length)}</div>
         </div>
         <div class="stat">
             <div class="label">الإجمالي العام</div>
@@ -891,7 +967,7 @@ function render(){
         </div>`;
     stats.style.display = 'flex';
 
-    const warn = document.getElementById('warnBox');
+    /* التحذيرات */
     const warnings = [];
     if (state.missingItems.length){
         warnings.push(`<b>أصناف غير موجودة في الملف (${state.missingItems.length}):</b> ${state.missingItems.map(esc).join('، ')}`);
@@ -906,10 +982,19 @@ function render(){
         warn.style.display = 'none';
     }
 
+    /* الحاشية */
+    const modeNote = state.filterMode === 'active'
+        ? '<br>وضع العرض: <b>الأصناف التي فيها حركة فقط</b>.'
+        : '<br>وضع العرض: <b>كل الأصناف</b>.';
+    footnote.innerHTML = `
+        الأرقام تمثل عدد الوجبات الجانبية لكل موظف حسب الأصناف المحددة فقط.
+        الجدول معروض بشكل مقلوب: الأصناف على الجانب، وأسماء الموظفين في الأعلى.
+        العدد <b>-</b> يعني لا توجد وجبات مسجلة.${modeNote}`;
+    footnote.style.display = 'block';
+
     document.getElementById('printedText').textContent = 'Printed: ' + dateStamp();
-    document.getElementById('emptyState').style.display = 'none';
-    document.getElementById('tableWrap').style.display = 'block';
-    document.getElementById('footnote').style.display = 'block';
+    emptyEl.style.display = 'none';
+    tableWrap.style.display = 'block';
 }
 
 /* =========================================================
@@ -951,11 +1036,16 @@ async function loadFile(file){
 }
 
 /* =========================================================
-   تصدير PDF — تكرار رأس الجدول + بدون كروت/بيانات وصفية
+   تصدير PDF — يعتمد على الجدول المعروض حالياً
    ========================================================= */
 async function exportPDF(){
     if (!state.matrix || Object.keys(state.matrix).length === 0){
         alert('الرجاء تحميل ملف Excel أولاً.');
+        return;
+    }
+
+    if (getVisibleItems().length === 0){
+        alert('لا توجد أصناف للتصدير في وضع "الحركة". اختر "كل الأصناف" أو حمّل ملفاً به بيانات.');
         return;
     }
 
@@ -978,10 +1068,8 @@ async function exportPDF(){
     wrap.style.width = 'auto';
 
     try{
-        // انتظار تطبيق تنسيقات pdf-mode قبل القياس
         await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
-        /* --- قياس المواضع في CSS px --- */
         const reportRect = report.getBoundingClientRect();
         const reportTop = reportRect.top;
 
@@ -993,7 +1081,6 @@ async function exportPDF(){
         const theadTopCss = theadRect.top - reportTop;
         const theadBottomCss = theadRect.bottom - reportTop;
 
-        // حدود أسفل كل صف (بالنسبة لأعلى التقرير) + أسفل tfoot
         const boundariesCss = [];
         Array.from(tbodyEl.children).forEach(tr => {
             const r = tr.getBoundingClientRect();
@@ -1002,7 +1089,6 @@ async function exportPDF(){
         const tfootRect = tfootEl.getBoundingClientRect();
         boundariesCss.push(tfootRect.bottom - reportTop);
 
-        /* --- تحويل التقرير إلى صورة واحدة --- */
         const canvas = await html2canvas(report, {
             scale: 2,
             backgroundColor: '#ffffff',
@@ -1018,13 +1104,11 @@ async function exportPDF(){
         const theadHeight = theadBottom - theadTop;
 
         const boundariesPx = boundariesCss.map(b => Math.round(b * canvasPxPerCssPx));
-        // آخر حد هو نهاية التقرير (يشمل الحاشية أسفل الجدول)
         boundariesPx.push(canvas.height);
         boundariesPx.sort((a, b) => a - b);
 
         const totalContentBottom = canvas.height;
 
-        /* --- إعداد PDF أفقي --- */
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF('l', 'pt', 'a4');
         const pdfW = pdf.internal.pageSize.getWidth();
@@ -1033,20 +1117,15 @@ async function exportPDF(){
         const usableW = pdfW - 2 * marginPt;
         const usableH = pdfH - 2 * marginPt;
 
-        // مقدار النقاط (pt) لكل بكسل في الكانفس بناءً على تحجيم العرض
         const ptPerCanvasPx = usableW / canvas.width;
-        // الحد الأقصى لارتفاع الصفحة في بكسلات الكانفس
         const pageHeightPx = usableH / ptPerCanvasPx;
 
-        /* --- تقسيم الصفحات على حدود الصفوف --- */
-        // الصفحة الأولى: رأس التقرير + thead + صفوف
         let page1Bottom = theadBottom;
         for (const b of boundariesPx){
             if (b <= pageHeightPx) page1Bottom = b;
             else break;
         }
 
-        // الصفحات التالية: thead + صفوف
         const availRowsHeightPx = pageHeightPx - theadHeight;
 
         const pageSlices = [];
@@ -1063,7 +1142,6 @@ async function exportPDF(){
                 if (b > cursor && b <= nextLimit) pageBottom = b;
             }
             if (pageBottom === null){
-                // لا يوجد حد يدخل في المساحة — نأخذ الحد التالي لتجنب الحلقة اللانهائية
                 for (const b of boundariesPx){
                     if (b > cursor){ pageBottom = b; break; }
                 }
@@ -1080,7 +1158,6 @@ async function exportPDF(){
             cursor = pageBottom;
         }
 
-        /* --- رسم كل صفحة --- */
         for (let i = 0; i < pageSlices.length; i++){
             const slice = pageSlices[i];
             if (i > 0) pdf.addPage();
@@ -1099,7 +1176,6 @@ async function exportPDF(){
 
             let drawY = 0;
 
-            // في الصفحات التالية: نرسم رأس الجدول أولاً
             if (!slice.isFirst){
                 ctx.drawImage(
                     canvas,
@@ -1109,7 +1185,6 @@ async function exportPDF(){
                 drawY += headerHeight;
             }
 
-            // محتوى الصفحة (رأس التقرير + صفوف / صفوف فقط)
             ctx.drawImage(
                 canvas,
                 0, slice.bodyY1, canvas.width, bodyHeight,
@@ -1139,11 +1214,17 @@ async function exportPDF(){
 }
 
 /* =========================================================
-   تصدير Excel
+   تصدير Excel — يطبق نفس الفلتر
    ========================================================= */
 function exportXLSX(){
     if (!state.matrix || Object.keys(state.matrix).length === 0){
         alert('الرجاء تحميل ملف Excel أولاً.');
+        return;
+    }
+
+    const visibleItems = getVisibleItems();
+    if (visibleItems.length === 0){
+        alert('لا توجد أصناف للتصدير في وضع "الحركة". اختر "كل الأصناف".');
         return;
     }
 
@@ -1154,9 +1235,10 @@ function exportXLSX(){
         ['Subgroup', 'Appetizeer___Z'],
         ['Period', state.period || ''],
         ['Printed', dateStamp()],
+        ['Filter', state.filterMode === 'active' ? 'Active items only' : 'All items'],
         [],
         ['Item \\ Employee', ...EMPLOYEES, 'Total'],
-        ...ITEMS.map(item => [
+        ...visibleItems.map(item => [
             item,
             ...EMPLOYEES.map(emp => {
                 const v = state.matrix[item][emp] || 0;
@@ -1192,6 +1274,16 @@ document.getElementById('fileInput').addEventListener('change', e => {
 
 document.getElementById('btnPdf').addEventListener('click', exportPDF);
 document.getElementById('btnXlsx').addEventListener('click', exportXLSX);
+
+/* ★ فلتر الأصناف */
+document.querySelectorAll('input[name="itemFilter"]').forEach(inp => {
+    inp.addEventListener('change', () => {
+        document.querySelectorAll('.filter-group label').forEach(l => l.classList.remove('active'));
+        inp.closest('label').classList.add('active');
+        state.filterMode = inp.value;
+        render();
+    });
+});
 
 document.getElementById('printedText').textContent = 'Printed: ' + dateStamp();
 
