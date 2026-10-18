@@ -14,349 +14,444 @@
     :root{
         --red:#C8102E;
         --red-dark:#9B0C23;
+        --red-soft:#fdecef;
         --ink:#1f2937;
         --muted:#6b7280;
         --line:#e5e7eb;
+        --line-soft:#f1f2f4;
         --bg:#f4f5f7;
+        --card:#ffffff;
+        --ok:#10b981;
     }
     *{box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
     body{
         margin:0;
         background:var(--bg);
         color:var(--ink);
         font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         direction:rtl;
-        padding:24px 16px 130px;
+        padding:24px 16px 140px;
         -webkit-font-smoothing:antialiased;
+        min-height:100vh;
     }
 
-    /* ============ شريط الأدوات ============ */
+    /* ===================== شريط الأدوات ===================== */
     .toolbar{
-        max-width:900px; margin:0 auto 18px;
-        display:flex; flex-wrap:wrap; align-items:center; gap:10px;
-    }
-    .btn, .file-btn{
-        display:inline-flex; align-items:center; gap:8px;
-        border:none; border-radius:9px; cursor:pointer;
-        padding:11px 20px; font-size:.85rem; font-weight:700;
-        font-family:inherit; transition:.22s ease;
-        box-shadow:0 4px 12px rgba(0,0,0,.08);
-    }
-    .btn:disabled{opacity:.55; cursor:not-allowed;}
-    .file-btn{background:var(--red); color:#fff;}
-    .file-btn:hover{background:var(--red-dark); transform:translateY(-1px);}
-    .btn-pdf{background:#1f2937; color:#fff;}
-    .btn-pdf:hover{background:#111827; transform:translateY(-1px);}
-    .btn-xls{background:#107C41; color:#fff;}
-    .btn-xls:hover{background:#0c5e31; transform:translateY(-1px);}
-    .file-name{
-        font-size:.78rem; color:var(--muted);
-        background:#fff; border:1px dashed var(--line);
-        padding:9px 14px; border-radius:9px;
-    }
-
-    /* ★ مجموعة تصفية الأصناف */
-    .filter-group{
-        display:inline-flex;
-        background:#fff;
-        border:1px solid var(--line);
-        border-radius:9px;
-        overflow:hidden;
-        box-shadow:0 2px 6px rgba(0,0,0,.05);
-    }
-    .filter-group label{
-        padding:9px 14px;
-        font-size:.78rem;
-        font-weight:700;
-        cursor:pointer;
-        color:var(--muted);
-        transition:all .18s ease;
+        max-width:1100px;
+        margin:0 auto 20px;
         display:flex;
+        flex-wrap:wrap;
         align-items:center;
-        gap:6px;
-        user-select:none;
+        gap:10px;
+        background:var(--card);
+        padding:12px 14px;
+        border-radius:14px;
+        box-shadow:0 4px 18px rgba(0,0,0,.06);
+        border:1px solid var(--line);
     }
-    .filter-group label:not(:last-child){ border-left:1px solid var(--line); }
-    .filter-group input{ display:none; }
-    .filter-group label.active{
-        background:var(--red);
-        color:#fff;
+    .toolbar-section{display:flex; align-items:center; gap:8px;}
+    .toolbar-divider{width:1px; height:36px; background:var(--line); margin:0 4px;}
+
+    /* ★ أزرار التصدير — تكبير + ترتيب أولاً */
+    .btn{
+        display:inline-flex; align-items:center; gap:8px;
+        border:none; border-radius:10px; cursor:pointer;
+        padding:13px 24px; font-size:.95rem; font-weight:800;
+        font-family:inherit; transition:.2s ease;
+        white-space:nowrap;
+        letter-spacing:.2px;
+    }
+    .btn:disabled{opacity:.55; cursor:not-allowed; transform:none !important;}
+    .btn-pdf{background:#1f2937; color:#fff; box-shadow:0 4px 14px rgba(31,41,55,.28);}
+    .btn-pdf:hover:not(:disabled){background:#111827; transform:translateY(-2px);}
+    .btn-xls{background:#107C41; color:#fff; box-shadow:0 4px 14px rgba(16,124,65,.28);}
+    .btn-xls:hover:not(:disabled){background:#0c5e31; transform:translateY(-2px);}
+    .btn .btn-emoji{font-size:1.15rem; line-height:1;}
+
+    /* زر تحميل Excel */
+    .file-btn{
+        display:inline-flex; align-items:center; gap:8px;
+        background:var(--red); color:#fff;
+        border:none; border-radius:10px; cursor:pointer;
+        padding:13px 22px; font-size:.95rem; font-weight:800;
+        font-family:inherit; transition:.2s ease;
+        box-shadow:0 4px 14px rgba(200,16,46,.28);
+        white-space:nowrap;
+    }
+    .file-btn:hover{background:var(--red-dark); transform:translateY(-2px);}
+    .file-btn .icon{font-size:1.15rem; line-height:1;}
+
+    /* مجموعة الأزرار المقطعيّة */
+    .segmented{display:inline-flex; background:#f1f2f4; border-radius:10px; padding:3px; gap:2px;}
+    .segmented label{cursor:pointer; position:relative;}
+    .segmented input{display:none;}
+    .segmented span{
+        display:block; padding:8px 16px; border-radius:8px;
+        font-size:.82rem; font-weight:700; color:var(--muted);
+        transition:all .18s ease; white-space:nowrap;
+    }
+    .segmented input:checked + span{
+        background:#fff; color:var(--red);
+        box-shadow:0 1px 3px rgba(0,0,0,.1);
     }
 
-    /* ============ بطاقة التقرير ============ */
-    .report{
-        max-width:900px; margin:0 auto; background:#fff;
-        border:1px solid #eceef1; border-radius:14px;
-        box-shadow:0 10px 30px rgba(0,0,0,.07);
-        padding:28px 30px 30px;
+    /* زر تبديل الاتجاه */
+    .orientation-btn{
+        display:inline-flex; align-items:center; gap:8px;
+        background:#fff; color:var(--ink);
+        border:1px solid var(--line); border-radius:10px;
+        padding:12px 16px; font-size:.84rem; font-weight:700;
+        font-family:inherit; cursor:pointer;
+        transition:.2s ease; white-space:nowrap;
     }
+    .orientation-btn:hover{border-color:var(--red); color:var(--red); background:#fffafa;}
+    .orientation-btn .ori-icon{font-size:1.05rem; display:inline-block; transition:transform .3s ease;}
+    .orientation-btn:hover .ori-icon{transform:rotate(180deg);}
+
+    /* ===================== البطاقة الأساسية ===================== */
+    .report{
+        max-width:1100px; margin:0 auto; background:var(--card);
+        border:1px solid #eceef1; border-radius:16px;
+        box-shadow:0 10px 34px rgba(0,0,0,.07);
+        padding:26px 28px 30px;
+    }
+
     .report-head{
         display:flex; justify-content:space-between; align-items:flex-start;
         gap:20px; padding-bottom:16px; border-bottom:3px solid var(--red);
     }
     .brand{display:flex; align-items:center; gap:16px;}
     .brand img{
-        width:88px; height:88px; object-fit:contain;
-        border:1px solid #eee; border-radius:12px; background:#fff; padding:5px;
-        display:block;
+        width:80px; height:80px; object-fit:contain;
+        border:1px solid #eee; border-radius:12px;
+        background:#fff; padding:5px; display:block;
     }
     .brand h1{margin:0; font-size:1.2rem; color:var(--red); font-weight:800;}
-    .brand p{margin:4px 0 0; font-size:.78rem; color:var(--muted); direction:ltr; letter-spacing:.4px;}
+    .brand p{margin:4px 0 0; font-size:.76rem; color:var(--muted); direction:ltr; letter-spacing:.4px;}
+    .meta{text-align:left; direction:ltr; font-size:.74rem; color:var(--muted); line-height:1.7;}
+    .meta .title{font-size:.98rem; font-weight:800; color:var(--ink); margin-bottom:3px;}
 
-    .meta{text-align:left; direction:ltr; font-size:.76rem; color:var(--muted); line-height:1.75;}
-    .meta .title{font-size:1rem; font-weight:800; color:var(--ink); margin-bottom:3px;}
-
-    /* ============ البطاقات الإحصائية ============ */
-    .stats{display:flex; gap:12px; flex-wrap:wrap; margin:18px 0 4px;}
-    .stat{
-        flex:1 1 140px; background:#fafbfc;
-        border:1px solid var(--line); border-radius:10px; padding:11px 15px;
-    }
-    .stat .label{font-size:.72rem; color:var(--muted); margin-bottom:5px;}
-    .stat .value{font-size:1.18rem; font-weight:800; color:var(--red); direction:ltr;}
-
-    /* ============ الجدول العريض ============ */
+    /* ===================== الجدول ===================== */
     .table-wrap{
-        margin-top:18px;
-        overflow-x:auto;
-        border:1px solid var(--line);
-        border-radius:10px;
-        background:#fff;
+        margin-top:16px;
+        overflow-x:auto; overflow-y:visible;
+        border:1px solid var(--line); border-radius:11px;
+        background:#fff; max-height:none;
     }
 
     table.report-table{
-        border-collapse:separate;
-        border-spacing:0;
-        width:max-content;
-        min-width:100%;
-        font-size:0.74rem;
-        direction:rtl;
+        border-collapse:separate; border-spacing:0;
+        width:max-content; min-width:100%;
+        font-size:0.76rem; direction:rtl;
     }
 
     table.report-table thead th{
-        background:var(--red);
-        color:#fff;
-        font-weight:700;
-        font-size:0.62rem;
-        line-height:1.25;
-        padding:8px 5px;
-        text-align:center;
-        vertical-align:bottom;
-        white-space:normal;
-        word-break:break-word;
-        min-width:58px;
-        max-width:70px;
-        height:auto;
-        min-height:88px;
-        position:sticky;
-        top:0;
-        z-index:3;
+        background:var(--red); color:#fff; font-weight:700;
+        font-size:0.64rem; line-height:1.25;
+        padding:9px 5px; text-align:center; vertical-align:bottom;
+        white-space:normal; word-break:break-word;
+        min-width:58px; max-width:70px;
+        position:sticky; top:0; z-index:3;
         border-bottom:2px solid var(--red-dark);
         border-left:1px solid rgba(255,255,255,.15);
     }
     table.report-table thead th:first-child{border-left:none;}
-
     table.report-table thead th.item-header{
-        position:sticky;
-        top:0;
-        right:0;
-        z-index:5;
-        text-align:right;
-        direction:rtl;
-        min-width:175px;
-        max-width:175px;
-        background:var(--red-dark);
-        border-left:2px solid #fff;
-        font-size:0.7rem;
+        position:sticky; top:0; right:0; z-index:5;
+        text-align:right; direction:rtl;
+        min-width:180px; max-width:180px;
+        background:var(--red-dark); border-left:2px solid #fff;
+        font-size:0.72rem;
     }
-
     table.report-table thead th.total-header{
-        background:var(--red-dark);
-        min-width:58px;
-        max-width:58px;
+        background:var(--red-dark); min-width:58px; max-width:58px;
     }
 
     table.report-table tbody td{
-        padding:6px 5px;
-        text-align:center;
-        border-bottom:1px solid #f1f2f4;
-        direction:ltr;
-        font-variant-numeric:tabular-nums;
+        padding:7px 5px; text-align:center;
+        border-bottom:1px solid var(--line-soft);
+        direction:ltr; font-variant-numeric:tabular-nums;
     }
-
     table.report-table tbody td.item-name{
-        position:sticky;
-        right:0;
-        z-index:2;
-        text-align:right;
-        direction:ltr;
-        font-weight:600;
-        font-size:0.7rem;
-        color:var(--ink);
-        background:#fff;
-        border-left:1px solid var(--line);
-        min-width:175px;
-        max-width:175px;
-        white-space:normal;
-        word-break:break-word;
-        line-height:1.3;
+        position:sticky; right:0; z-index:2;
+        text-align:right; direction:ltr;
+        font-weight:600; font-size:0.72rem; color:var(--ink);
+        background:#fff; border-left:1px solid var(--line);
+        min-width:180px; max-width:180px;
+        white-space:normal; word-break:break-word; line-height:1.3;
     }
-
     table.report-table tbody tr:nth-child(even){background:#fafbfc;}
     table.report-table tbody tr:nth-child(even) td.item-name{background:#fafbfc;}
     table.report-table tbody tr:hover{background:#fdf1f3;}
     table.report-table tbody tr:hover td.item-name{background:#fdf1f3;}
 
     table.report-table tbody td.total-cell{
-        font-weight:700;
-        color:var(--red);
-        background:#fff9fa;
+        font-weight:700; color:var(--red); background:#fff9fa;
     }
     table.report-table tbody tr:nth-child(even) td.total-cell{background:#fdf3f5;}
 
-    table.report-table td.dash{
-        color:#c3c7ce;
-        font-weight:400;
-    }
+    table.report-table td.dash{color:#c3c7ce; font-weight:400;}
 
     table.report-table tfoot td{
-        padding:9px 5px;
-        font-weight:800;
-        text-align:center;
-        background:#fdecef;
-        color:var(--red-dark);
+        padding:10px 5px; font-weight:800; text-align:center;
+        background:var(--red-soft); color:var(--red-dark);
         border-top:2px solid var(--red);
-        direction:ltr;
-        font-variant-numeric:tabular-nums;
-        font-size:0.72rem;
+        direction:ltr; font-variant-numeric:tabular-nums;
+        font-size:0.74rem;
     }
     table.report-table tfoot td.item-name{
-        position:sticky;
-        right:0;
-        z-index:2;
-        text-align:right;
-        direction:rtl;
-        background:#fdecef;
+        position:sticky; right:0; z-index:2;
+        text-align:right; direction:rtl;
+        background:var(--red-soft);
         border-left:2px solid var(--red);
-        min-width:175px;
-        max-width:175px;
+        min-width:180px; max-width:180px;
     }
     table.report-table tfoot td.dash{color:#b9848f; font-weight:700;}
 
+    /* الوضع المقلوب (الموظفون رأسي) */
+    table.report-table.transposed thead th:not(.item-header):not(.total-header){
+        min-width:72px; max-width:85px;
+        font-size:0.58rem; padding:8px 4px;
+    }
+    table.report-table.transposed thead th.item-header{
+        min-width:220px; max-width:240px;
+    }
+    table.report-table.transposed tbody td.item-name{
+        min-width:220px; max-width:240px;
+        font-size:0.68rem;
+        white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    table.report-table.transposed tfoot td.item-name{
+        min-width:220px; max-width:240px;
+    }
+
+    /* ===================== الحاشية والتحذيرات ===================== */
     .footnote{
         margin-top:16px; font-size:.72rem; color:var(--muted);
-        border-top:1px dashed var(--line); padding-top:10px; line-height:1.8;
+        border-top:1px dashed var(--line);
+        padding-top:12px; line-height:1.85;
     }
     .warn{
-        margin-top:14px; padding:10px 14px; border-radius:9px;
+        margin-top:14px; padding:11px 14px; border-radius:10px;
         background:#fff7ed; border:1px solid #fed7aa;
-        color:#9a3412; font-size:.78rem; font-weight:600;
-        line-height:1.7;
+        color:#9a3412; font-size:.78rem; font-weight:600; line-height:1.7;
     }
     .warn b{color:#7c2d12;}
 
-    /* ============ حالة عدم وجود بيانات ============ */
     .empty{
-        text-align:center; padding:55px 20px; color:var(--muted); font-size:.9rem;
+        text-align:center; padding:60px 20px; color:var(--muted);
+        font-size:.9rem;
+        background:linear-gradient(180deg, #fafbfc, #ffffff);
+        border:1px dashed var(--line); border-radius:12px;
+        margin-top:16px;
     }
-    .empty b{display:block; color:var(--ink); font-size:1rem; margin-bottom:8px;}
+    .empty .empty-icon{font-size:2.6rem; margin-bottom:12px; opacity:.4;}
+    .empty b{display:block; color:var(--ink); font-size:1.02rem; margin-bottom:8px;}
 
-    /* ============ وضع PDF ============ */
-    .report.pdf-mode .table-wrap{
-        overflow:visible;
-        border:none;
-        border-radius:0;
+    /* ============================================================
+       ★★★ وضع PDF — صفحة واحدة + تكبير الأرقام فقط ★★★
+       ============================================================ */
+
+    .report.pdf-mode{
+        padding: 6px 8px 8px !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        width: max-content !important;
+        max-width: none !important;
     }
-    .report.pdf-mode table.report-table{ font-size:0.55rem; }
+
+    /* رأس التقرير — صغير جداً */
+    .report.pdf-mode .report-head{
+        padding-bottom: 4px !important;
+        border-bottom: 2px solid var(--red) !important;
+        gap: 8px !important;
+        margin-bottom: 2px;
+    }
+    .report.pdf-mode .brand{gap: 6px !important;}
+    .report.pdf-mode .brand img{
+        width: 34px !important;
+        height: 34px !important;
+        padding: 2px !important;
+        border-radius: 5px !important;
+        border: 1px solid #eee !important;
+    }
+    .report.pdf-mode .brand h1{
+        font-size: 0.7rem !important;
+        line-height: 1.1 !important;
+    }
+    .report.pdf-mode .brand p{
+        font-size: 0.42rem !important;
+        margin-top: 1px !important;
+        letter-spacing: .2px !important;
+    }
+    .report.pdf-mode .meta .title{
+        font-size: 0.6rem !important;
+        margin-bottom: 0 !important;
+    }
+
+    /* إخفاء الزوائد */
+    .report.pdf-mode .meta-line{ display: none !important; }
+    .report.pdf-mode .warn{ display: none !important; }
+
+    /* الجدول */
+    .report.pdf-mode .table-wrap{
+        margin-top: 4px !important;
+        overflow: visible !important;
+        border: none !important;
+        border-radius: 0 !important;
+        width: auto !important;
+    }
+
+    .report.pdf-mode table.report-table{
+        font-size: 0.55rem;
+        width: max-content !important;
+        min-width: 0 !important;
+    }
+
+    /* رأس الجدول: نص صغير */
     .report.pdf-mode table.report-table thead th{
-        font-size:0.5rem;
-        padding:4px 2px;
-        min-width:42px;
-        max-width:42px;
-        min-height:70px;
-        position:static !important;
+        font-size: 0.46rem !important;
+        padding: 2px 1px !important;
+        min-width: 30px !important;
+        max-width: 34px !important;
+        min-height: 56px !important;
+        position: static !important;
     }
     .report.pdf-mode table.report-table thead th.item-header{
-        min-width:140px;
-        max-width:140px;
-        font-size:0.58rem;
+        min-width: 100px !important;
+        max-width: 100px !important;
+        font-size: 0.5rem !important;
+        text-align: right !important;
     }
     .report.pdf-mode table.report-table thead th.total-header{
-        min-width:42px;
-        max-width:42px;
+        min-width: 30px !important;
+        max-width: 34px !important;
     }
+
+    /* جسم الجدول */
     .report.pdf-mode table.report-table tbody td{
-        padding:3px 2px;
-        font-size:0.55rem;
+        font-size: 0.55rem;
+        padding: 1px 1px !important;
     }
+
+    /* ★ الأرقام فقط أكبر بـ 10% ★ */
+    .report.pdf-mode table.report-table tbody td.num,
+    .report.pdf-mode table.report-table tbody td.total-cell{
+        font-size: 0.61rem !important;
+    }
+
     .report.pdf-mode table.report-table tbody td.item-name{
-        position:static !important;
-        font-size:0.58rem;
-        min-width:140px;
-        max-width:140px;
-        white-space:nowrap;
-        overflow:hidden;
-        text-overflow:ellipsis;
+        font-size: 0.48rem !important;
+        min-width: 100px !important;
+        max-width: 100px !important;
+        padding: 1px 3px !important;
+        position: static !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
     }
+
     .report.pdf-mode table.report-table tfoot td{
-        padding:5px 2px;
-        font-size:0.58rem;
+        font-size: 0.61rem !important;
+        padding: 2px 1px !important;
     }
     .report.pdf-mode table.report-table tfoot td.item-name{
-        position:static !important;
-        min-width:140px;
-        max-width:140px;
+        min-width: 100px !important;
+        max-width: 100px !important;
+        font-size: 0.48rem !important;
+        position: static !important;
     }
 
-    /* إخفاء كروت المجاميع وأسطر البيانات الوصفية في وضع PDF */
-    .report.pdf-mode .stats{ display:none !important; }
-    .report.pdf-mode .meta-line{ display:none !important; }
+    /* الوضع المقلوب (الموظفون رأسي) */
+    .report.pdf-mode table.report-table.transposed thead th:not(.item-header):not(.total-header){
+        min-width: 24px !important;
+        max-width: 26px !important;
+        font-size: 0.4rem !important;
+        padding: 2px 1px !important;
+        min-height: 62px !important;
+    }
+    .report.pdf-mode table.report-table.transposed thead th.item-header{
+        min-width: 100px !important;
+        max-width: 100px !important;
+        font-size: 0.46rem !important;
+    }
+    .report.pdf-mode table.report-table.transposed thead th.total-header{
+        min-width: 26px !important;
+        max-width: 28px !important;
+    }
+    .report.pdf-mode table.report-table.transposed tbody td{
+        font-size: 0.55rem;
+        padding: 1px 1px !important;
+    }
+    .report.pdf-mode table.report-table.transposed tbody td.num,
+    .report.pdf-mode table.report-table.transposed tbody td.total-cell{
+        font-size: 0.61rem !important;
+    }
+    .report.pdf-mode table.report-table.transposed tbody td.item-name{
+        min-width: 100px !important;
+        max-width: 100px !important;
+        font-size: 0.46rem !important;
+        padding: 1px 3px !important;
+    }
+    .report.pdf-mode table.report-table.transposed tfoot td{
+        font-size: 0.61rem !important;
+    }
+    .report.pdf-mode table.report-table.transposed tfoot td.item-name{
+        min-width: 100px !important;
+        max-width: 100px !important;
+        font-size: 0.46rem !important;
+    }
 
-    /* ============ توقيع المطور ============ */
+    .report.pdf-mode .footnote{
+        font-size: 0.38rem !important;
+        padding-top: 3px !important;
+        margin-top: 3px !important;
+        line-height: 1.3 !important;
+        border-top-width: 1px !important;
+    }
+
+    /* ===================== توقيع المطور ===================== */
     .signature-card{
-        position:fixed;
-        bottom:20px;
-        left:20px;
-        background:#ffffff;
-        color:#C8102E;
-        border:1.5px solid #C8102E;
-        border-radius:6.375px;
+        position:fixed; bottom:20px; left:20px;
+        background:#ffffff; color:var(--red);
+        border:1.5px solid var(--red); border-radius:6.375px;
         padding:7.875px 13.125px;
         font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        font-size:0.6rem;
-        font-weight:600;
-        z-index:1000;
-        transition:all .25s ease;
-        cursor:pointer;
-        text-decoration:none;
-        display:inline-block;
+        font-size:0.6rem; font-weight:600;
+        z-index:1000; transition:all .25s ease;
+        cursor:pointer; text-decoration:none; display:inline-block;
         box-shadow:0 4px 14px rgba(200,16,46,.12);
     }
-    .signature-card:hover{
-        transform:scale(1.04);
-        box-shadow:0 8px 20px rgba(200,16,46,.22);
-    }
-    .signature-card .name{
-        font-size:0.7125rem;
-        font-weight:700;
-        margin-bottom:3.75px;
-    }
-    .signature-card .title{
-        font-size:0.525rem;
-        opacity:.9;
-        font-weight:500;
-    }
+    .signature-card:hover{transform:scale(1.04); box-shadow:0 8px 20px rgba(200,16,46,.22);}
+    .signature-card .name{font-size:0.7125rem; font-weight:700; margin-bottom:3.75px;}
+    .signature-card .title{font-size:0.525rem; opacity:.9; font-weight:500;}
 
-    @media (max-width:768px){
-        .signature-card{
-            position:relative; bottom:auto; left:auto;
-            margin:24px auto 0; width:fit-content;
+    /* ===================== استجابة الجوال ===================== */
+    @media (max-width:900px){
+        .toolbar-section.export-section{
+            width:100%;
+            justify-content:flex-start;
         }
+    }
+    @media (max-width:768px){
+        body{padding:16px 12px 130px;}
+        .toolbar{padding:10px;}
+        .toolbar-divider{display:none;}
+        .signature-card{position:relative; bottom:auto; left:auto; margin:24px auto 0; width:fit-content;}
         .signature-card:hover{transform:none;}
-        .report{padding:20px 16px;}
+        .report{padding:18px 14px;}
         .report-head{flex-direction:column;}
         .meta{text-align:right; direction:ltr;}
-        .brand img{width:72px; height:72px;}
+        .brand img{width:66px; height:66px;}
+        .btn{padding:11px 18px; font-size:.88rem;}
+        .file-btn{padding:11px 18px; font-size:.88rem;}
+    }
+    @media (max-width:480px){
+        .segmented span{padding:6px 10px; font-size:.72rem;}
+        .orientation-btn{padding:8px 10px; font-size:.72rem;}
+        .btn{padding:10px 14px; font-size:.82rem;}
+        .file-btn{padding:10px 14px; font-size:.82rem;}
     }
 
     @media print{
@@ -370,26 +465,48 @@
 
 <!-- ===== شريط الأدوات ===== -->
 <div class="toolbar">
-    <label class="file-btn">
-        📂 تحميل ملف Excel (xlsx / xlsm)
-        <input type="file" id="fileInput" accept=".xlsx,.xlsm" hidden>
-    </label>
-    <button id="btnPdf" class="btn btn-pdf">📄 تصدير PDF (أفقي)</button>
-    <button id="btnXlsx" class="btn btn-xls">📊 تصدير Excel</button>
-
-    <!-- ★ تصفية الأصناف -->
-    <div class="filter-group" role="group" aria-label="تصفية الأصناف">
-        <label class="active">
-            <input type="radio" name="itemFilter" value="all" checked>
-            كل الأصناف
-        </label>
-        <label>
-            <input type="radio" name="itemFilter" value="active">
-            الأصناف التي فيها حركة
-        </label>
+    <!-- ★ 1) أزرار التصدير أولاً (تكبير + ترتيب قبل زر التحميل) -->
+    <div class="toolbar-section export-section">
+        <button id="btnPdf" class="btn btn-pdf"><span class="btn-emoji">📄</span> PDF</button>
+        <button id="btnXlsx" class="btn btn-xls"><span class="btn-emoji">📊</span> Excel</button>
     </div>
 
-    <span class="file-name" id="fileName">لم يتم تحميل أي ملف</span>
+    <div class="toolbar-divider"></div>
+
+    <!-- 2) تصفية الأصناف -->
+    <div class="toolbar-section">
+        <div class="segmented" role="group" aria-label="تصفية الأصناف">
+            <label class="active">
+                <input type="radio" name="itemFilter" value="all" checked>
+                <span>كل الأصناف</span>
+            </label>
+            <label>
+                <input type="radio" name="itemFilter" value="active">
+                <span>ذات حركة</span>
+            </label>
+        </div>
+    </div>
+
+    <div class="toolbar-divider"></div>
+
+    <!-- 3) تبديل الاتجاه -->
+    <div class="toolbar-section">
+        <button id="btnOrientation" class="orientation-btn" title="اضغط لتبديل اتجاه العرض">
+            <span class="ori-icon" id="oriIcon">⇅</span>
+            <span class="ori-label" id="oriLabel">الموظفون رأسي</span>
+        </button>
+    </div>
+
+    <div class="toolbar-divider"></div>
+
+    <!-- 4) زر تحميل Excel -->
+    <div class="toolbar-section">
+        <label class="file-btn">
+            <span class="icon">📂</span>
+            <span>تحميل ملف Excel</span>
+            <input type="file" id="fileInput" accept=".xlsx,.xlsm" hidden>
+        </label>
+    </div>
 </div>
 
 <!-- ===== منطقة التقرير ===== -->
@@ -412,9 +529,8 @@
         </div>
     </div>
 
-    <div class="stats" id="stats" style="display:none;"></div>
-
     <div class="empty" id="emptyState">
+        <div class="empty-icon">📋</div>
         <b>لا توجد بيانات لعرضها</b>
         قم بتحميل ملف Excel (xlsx / xlsm) لعرض التقرير المختصر.
     </div>
@@ -429,11 +545,7 @@
 
     <div class="warn" id="warnBox" style="display:none;"></div>
 
-    <div class="footnote" id="footnote" style="display:none;">
-        الأرقام تمثل عدد الوجبات الجانبية لكل موظف حسب الأصناف المحددة فقط.
-        الجدول معروض بشكل مقلوب: الأصناف على الجانب، وأسماء الموظفين في الأعلى.
-        العدد <b>-</b> يعني لا توجد وجبات مسجلة.
-    </div>
+    <div class="footnote" id="footnote" style="display:none;"></div>
 </div>
 
 <!-- ===== توقيع المطور ===== -->
@@ -444,10 +556,9 @@
 
 <script>
 /* =========================================================
-   الشعار — تحميل موثوق مع بدائل متعددة
+   الشعار
    ========================================================= */
 const LOGO_URL = 'https://i.postimg.cc/NM2zJWZD/NAIF-LOGO.jpg';
-
 const FALLBACK_LOGO_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">
     <defs>
@@ -464,16 +575,12 @@ const FALLBACK_LOGO_SVG = `
 </svg>`;
 
 function setFallbackLogo(){
-    const img = document.getElementById('logo');
-    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(FALLBACK_LOGO_SVG);
+    document.getElementById('logo').src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(FALLBACK_LOGO_SVG);
 }
-
 function loadLogo(){
     const target = document.getElementById('logo');
-
     const attempt = new Image();
     attempt.crossOrigin = 'anonymous';
-
     attempt.onload = function(){
         try{
             const c = document.createElement('canvas');
@@ -486,96 +593,49 @@ function loadLogo(){
             target.src = LOGO_URL + '?v=' + Date.now();
         }
     };
-
     attempt.onerror = function(){
         const plain = new Image();
         plain.onload = function(){
             target.removeAttribute('crossorigin');
             target.src = LOGO_URL + '?v=' + Date.now();
         };
-        plain.onerror = function(){
-            setFallbackLogo();
-        };
+        plain.onerror = setFallbackLogo;
         plain.src = LOGO_URL + '?v=' + Date.now();
     };
-
     attempt.src = LOGO_URL;
 }
 
 /* =========================================================
-   الأصناف (36)
+   الأصناف والموظفون
    ========================================================= */
 const ITEMS = [
-    'Cheesy Fries',
-    'Chick Fries',
-    'COLE SLAW Large _Z',
-    'COLE SLAW Small _Z',
-    'Fattoush _Z',
-    'Hummus _Z',
-    'Large Barbecue Sauce',
-    'Large Cheddar Sauce',
-    'Large Chilli Mayo Sauce',
-    'large dynamite garlic',
-    'Large Honey Mustard',
-    'Large Maboug Sauce',
-    'Large Mayo Ketchup',
-    'Large Mayonnaise Sauce',
-    'Large Peri Peri Sauce',
-    'Large Ranch Sauce',
-    'Large Spicy Cheese sauce',
-    'large sweet spicy sauce',
-    'mutabbal',
-    'ONION RINGS _Z',
-    'ONION RINGS FAMILY_Z',
-    'Puri Bread_Z',
-    'Rocca Salad _Z',
-    'Tabbouleh _Z',
-    'XLarge Barbecue Sauce',
-    'xlarge cheddar sauce',
-    'XLarge Chilli Mayo Sauce',
-    'XLarge Honey Mustard',
-    'xlarge maboug sauce',
-    'xlarge mayo ketchup',
-    'xlarge mayonnaise sauce',
-    'XLarge Peri Peri Sauce',
-    'xlarge pink sauce',
-    'xlarge ranch sauce',
-    'xlarge spicy cheese sauce',
-    'xlarge sweet spicy sauce'
+    'Cheesy Fries','Chick Fries','COLE SLAW Large _Z','COLE SLAW Small _Z',
+    'Fattoush _Z','Hummus _Z','Large Barbecue Sauce','Large Cheddar Sauce',
+    'Large Chilli Mayo Sauce','large dynamite garlic','Large Honey Mustard',
+    'Large Maboug Sauce','Large Mayo Ketchup','Large Mayonnaise Sauce',
+    'Large Peri Peri Sauce','Large Ranch Sauce','Large Spicy Cheese sauce',
+    'large sweet spicy sauce','mutabbal','ONION RINGS _Z','ONION RINGS FAMILY_Z',
+    'Puri Bread_Z','Rocca Salad _Z','Tabbouleh _Z','XLarge Barbecue Sauce',
+    'xlarge cheddar sauce','XLarge Chilli Mayo Sauce','XLarge Honey Mustard',
+    'xlarge maboug sauce','xlarge mayo ketchup','xlarge mayonnaise sauce',
+    'XLarge Peri Peri Sauce','xlarge pink sauce','xlarge ranch sauce',
+    'xlarge spicy cheese sauce','xlarge sweet spicy sauce'
 ];
 
-/* =========================================================
-   أسماء الموظفين (24)
-   ========================================================= */
 const EMPLOYEES = [
-    'Ahmed Hassan',
-    'AHMED HELMI ABD EL MONEM EL',
-    'Ahmed rubi',
-    'Ahmed Sami',
-    'AHMED SAMIR ALSAKA',
-    'Fayez Ibrahim Ashry',
-    'GAMAL MOHAMED AHMED',
-    'Gamal Nasr Mohamed',
-    'HAMED ABDELKADER MOHAMED',
-    'HISHAM GALAL MOHAMED',
-    'ibrahim gomaa eisa',
-    'ibrahim nagy ibrahim',
-    'KAREM RAFAT MAGHRABI',
-    'KHALED AHMED HAMDI MAHHOUD GABALLA',
-    'MAHMOUD ELSAYED AHMED EISA',
-    'MAHMOUD HAMDI MESBAH MOHAMMED',
-    'Mahmoud Najem',
-    'Moawad Mohamed Ahmad Hassan',
-    'mohamed ahmed mohamed ahmed',
-    'Mohamed Awad Abood',
-    'Mohammed Mohammed Abdulla',
-    'omar essam',
-    'SALEM QURSHI MOHAMED',
-    'SAYED METAWE MAHMOUD'
+    'Ahmed Hassan','AHMED HELMI ABD EL MONEM EL','Ahmed rubi','Ahmed Sami',
+    'AHMED SAMIR ALSAKA','Fayez Ibrahim Ashry','GAMAL MOHAMED AHMED',
+    'Gamal Nasr Mohamed','HAMED ABDELKADER MOHAMED','HISHAM GALAL MOHAMED',
+    'ibrahim gomaa eisa','ibrahim nagy ibrahim','KAREM RAFAT MAGHRABI',
+    'KHALED AHMED HAMDI MAHHOUD GABALLA','MAHMOUD ELSAYED AHMED EISA',
+    'MAHMOUD HAMDI MESBAH MOHAMMED','Mahmoud Najem',
+    'Moawad Mohamed Ahmad Hassan','mohamed ahmed mohamed ahmed',
+    'Mohamed Awad Abood','Mohammed Mohammed Abdulla','omar essam',
+    'SALEM QURSHI MOHAMED','SAYED METAWE MAHMOUD'
 ];
 
 /* =========================================================
-   الحالة العامة
+   الحالة — الافتراضي: الموظفون رأسي
    ========================================================= */
 const state = {
     matrix: {},
@@ -586,10 +646,10 @@ const state = {
     branch: '',
     missingItems: [],
     missingEmployees: [],
-    filterMode: 'all'   // ★ 'all' أو 'active'
+    filterMode: 'all',
+    orientation: 'employees-vertical'   // ★ الافتراضي
 };
 
-/* النص الأصلي للحالة الفارغة — يُستعاد عند تبديل الفلتر */
 const EMPTY_HTML_DEFAULT = document.getElementById('emptyState').innerHTML;
 
 /* =========================================================
@@ -604,33 +664,23 @@ function normalize(v){
         .replace(/\s+/g, ' ')
         .toLowerCase();
 }
-
 function toNum(v){
     if (v === null || v === undefined || v === '') return 0;
     const n = Number(String(v).replace(/,/g, '').trim());
     return isNaN(n) ? 0 : n;
 }
-
-function fmt(n){
-    return Number(n || 0).toLocaleString('en-US');
-}
-
-function isZero(v){
-    return !Number(v || 0);
-}
-
+function fmt(n){ return Number(n || 0).toLocaleString('en-US'); }
+function isZero(v){ return !Number(v || 0); }
 function esc(s){
     return String(s).replace(/[&<>"']/g, c => (
         {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
     ));
 }
-
 function dateStamp(){
     const d = new Date();
     const p = x => String(x).padStart(2, '0');
     return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
 }
-
 function isDateLike(v){
     if (v instanceof Date) return true;
     const s = String(v).trim();
@@ -640,8 +690,6 @@ function isDateLike(v){
     if (/^[A-Za-z]{3,}\s+\d{1,2},?\s+\d{4}/.test(s)) return true;
     return false;
 }
-
-/* ★ قائمة الأصناف المراد عرضها وفق الفلتر الحالي */
 function getVisibleItems(){
     if (state.filterMode === 'active'){
         return ITEMS.filter(it => (state.itemTotals[it] || 0) > 0);
@@ -657,42 +705,25 @@ const EMPLOYEE_DATA = EMPLOYEES.map(name => {
     const words = normalized.split(' ').filter(Boolean);
     return { name, normalized, words, set: new Set(words) };
 });
-
 function findBestEmployeeMatch(cellValue){
     const n = normalize(cellValue);
     if (!n) return null;
-
     const nWords = n.split(' ').filter(Boolean);
     if (!nWords.length) return null;
     const nSet = new Set(nWords);
 
-    let bestKey = null;
-    let bestScore = 0;
-
+    let bestKey = null, bestScore = 0;
     for (const emp of EMPLOYEE_DATA){
         let score = 0;
-
-        if (n === emp.normalized){
-            score = 1000;
-        } else {
+        if (n === emp.normalized) score = 1000;
+        else {
             const allTargetInCell = emp.words.every(w => nSet.has(w));
             const allCellInTarget = nWords.every(w => emp.set.has(w));
-
-            if (allTargetInCell && allCellInTarget){
-                score = 800;
-            } else if (allTargetInCell){
-                const extra = nWords.length - emp.words.length;
-                score = Math.max(100, 500 - extra * 10);
-            } else if (allCellInTarget && nWords.length >= 2){
-                const extra = emp.words.length - nWords.length;
-                score = Math.max(50, 300 - extra * 10);
-            }
+            if (allTargetInCell && allCellInTarget) score = 800;
+            else if (allTargetInCell) score = Math.max(100, 500 - (nWords.length - emp.words.length) * 10);
+            else if (allCellInTarget && nWords.length >= 2) score = Math.max(50, 300 - (emp.words.length - nWords.length) * 10);
         }
-
-        if (score > bestScore){
-            bestScore = score;
-            bestKey = emp.name;
-        }
+        if (score > bestScore){ bestScore = score; bestKey = emp.name; }
     }
     return bestKey;
 }
@@ -704,34 +735,27 @@ function findItemColumns(row){
     const res = {};
     const norm = row.map(cell => normalize(cell));
     const comp = norm.map(n => n.replace(/[\s\-_]+/g, ''));
-
     ITEMS.forEach(it => {
         const t  = normalize(it);
         const tc = t.replace(/[\s\-_]+/g, '');
         if (!tc) return;
-
         let idx = norm.findIndex(n => n && n === t);
         if (idx !== -1){ res[it] = idx; return; }
-
         idx = comp.findIndex(n => n && n === tc);
-        if (idx !== -1){ res[it] = idx; }
+        if (idx !== -1) res[it] = idx;
     });
     return res;
 }
-
 function findHeaderRow(rows){
     let best = { idx: -1, cols: {}, score: 0 };
     for (let r = 0; r < rows.length; r++){
         const cols = findItemColumns(rows[r] || []);
         const score = Object.keys(cols).length;
-        if (score > best.score){
-            best = { idx: r, cols, score };
-        }
+        if (score > best.score) best = { idx: r, cols, score };
         if (score === ITEMS.length) break;
     }
     return best;
 }
-
 function detectNameColumn(rows, headerRowIdx, itemCols){
     const used = new Set(Object.values(itemCols));
     const maxCols = Math.max(...rows.map(r => (r ? r.length : 0)), 0);
@@ -741,7 +765,6 @@ function detectNameColumn(rows, headerRowIdx, itemCols){
 
     for (let c = 0; c < maxCols; c++){
         if (used.has(c)) continue;
-
         let targetHits = 0, textCount = 0, totalCount = 0;
         const uniqueTexts = new Set();
 
@@ -751,15 +774,12 @@ function detectNameColumn(rows, headerRowIdx, itemCols){
             const s = String(v).trim();
             if (!s) continue;
             totalCount++;
-
             if (isDateLike(v)) continue;
             const lower = s.toLowerCase();
             if (lower === 'total' || lower === 'grand total' || lower.startsWith('total ')) continue;
             if (!isNaN(Number(s))) continue;
-
             textCount++;
             uniqueTexts.add(lower);
-
             if (findBestEmployeeMatch(s)) targetHits++;
         }
 
@@ -767,7 +787,6 @@ function detectNameColumn(rows, headerRowIdx, itemCols){
             bestTargetHits = targetHits;
             bestTargetCol = c;
         }
-
         if (textCount > 0 && totalCount > 0){
             const ratio = textCount / totalCount;
             if (ratio >= 0.4){
@@ -779,9 +798,7 @@ function detectNameColumn(rows, headerRowIdx, itemCols){
             }
         }
     }
-
-    if (bestTargetCol !== -1) return bestTargetCol;
-    return bestTextCol;
+    return bestTargetCol !== -1 ? bestTargetCol : bestTextCol;
 }
 
 /* =========================================================
@@ -790,15 +807,11 @@ function detectNameColumn(rows, headerRowIdx, itemCols){
 function buildReport(rows){
     const header = findHeaderRow(rows);
     if (header.idx === -1 || header.score === 0){
-        throw new Error('لم يتم العثور على أعمدة الأصناف داخل الملف. تأكد من مطابقة أسماء الأصناف.');
+        throw new Error('لم يتم العثور على أعمدة الأصناف داخل الملف.');
     }
-
     const itemCols = header.cols;
-
     const nameCol = detectNameColumn(rows, header.idx, itemCols);
-    if (nameCol === -1){
-        throw new Error('لم يتم العثور على عمود أسماء الموظفين داخل الملف.');
-    }
+    if (nameCol === -1) throw new Error('لم يتم العثور على عمود أسماء الموظفين داخل الملف.');
 
     const employeeRows = {};
     EMPLOYEES.forEach(emp => employeeRows[emp] = []);
@@ -806,19 +819,14 @@ function buildReport(rows){
     for (let r = header.idx + 1; r < rows.length; r++){
         const row = rows[r];
         if (!row) continue;
-
         const nameCell = row[nameCol];
         if (nameCell === undefined || nameCell === null || nameCell === '') continue;
-
         const s = String(nameCell).trim();
         if (!s) continue;
         const lower = s.toLowerCase();
         if (lower === 'total' || lower === 'grand total') continue;
-
         const matched = findBestEmployeeMatch(s);
-        if (matched){
-            employeeRows[matched].push(r);
-        }
+        if (matched) employeeRows[matched].push(r);
     }
 
     const matrix = {};
@@ -828,9 +836,7 @@ function buildReport(rows){
         EMPLOYEES.forEach(emp => {
             let sum = 0;
             if (col !== undefined){
-                employeeRows[emp].forEach(r => {
-                    sum += toNum(rows[r][col]);
-                });
+                employeeRows[emp].forEach(r => sum += toNum(rows[r][col]));
             }
             matrix[item][emp] = sum;
         });
@@ -839,7 +845,6 @@ function buildReport(rows){
     const itemTotals = {};
     const empTotals = {};
     let grandTotal = 0;
-
     ITEMS.forEach(item => {
         itemTotals[item] = 0;
         EMPLOYEES.forEach(emp => {
@@ -874,7 +879,29 @@ function buildReport(rows){
 }
 
 /* =========================================================
-   عرض التقرير (يستخدم getVisibleItems حسب الفلتر)
+   تبديل الاتجاه
+   ========================================================= */
+function toggleOrientation(){
+    state.orientation = state.orientation === 'items-vertical'
+        ? 'employees-vertical'
+        : 'items-vertical';
+    updateOrientationUI();
+    if (state.matrix && Object.keys(state.matrix).length) render();
+}
+function updateOrientationUI(){
+    const icon = document.getElementById('oriIcon');
+    const label = document.getElementById('oriLabel');
+    if (state.orientation === 'items-vertical'){
+        icon.textContent = '⇄';
+        label.textContent = 'الأصناف رأسي';
+    } else {
+        icon.textContent = '⇅';
+        label.textContent = 'الموظفون رأسي';
+    }
+}
+
+/* =========================================================
+   عرض التقرير — بدون كروت إحصائية
    ========================================================= */
 function render(){
     const thead = document.querySelector('#reportTable thead');
@@ -882,35 +909,69 @@ function render(){
     const tfoot = document.querySelector('#reportTable tfoot');
     const emptyEl = document.getElementById('emptyState');
     const tableWrap = document.getElementById('tableWrap');
-    const stats = document.getElementById('stats');
     const warn = document.getElementById('warnBox');
     const footnote = document.getElementById('footnote');
+    const table = document.getElementById('reportTable');
 
-    /* لا يوجد ملف محمّل */
     if (!state.matrix || Object.keys(state.matrix).length === 0){
         emptyEl.innerHTML = EMPTY_HTML_DEFAULT;
         emptyEl.style.display = 'block';
         tableWrap.style.display = 'none';
-        stats.style.display = 'none';
         warn.style.display = 'none';
         footnote.style.display = 'none';
         return;
     }
 
     const visibleItems = getVisibleItems();
-
-    /* فلتر "الحركة" مع عدم وجود أي صنف متحرك */
     if (visibleItems.length === 0){
-        emptyEl.innerHTML = '<b>لا توجد أصناف بها حركة</b>جميع الأصناف قيمتها صفر. اختر "كل الأصناف" لعرض الجميع.';
+        emptyEl.innerHTML = '<div class="empty-icon">📋</div><b>لا توجد أصناف بها حركة</b>جميع الأصناف قيمتها صفر. اختر "كل الأصناف" لعرض الجميع.';
         emptyEl.style.display = 'block';
         tableWrap.style.display = 'none';
-        stats.style.display = 'none';
         warn.style.display = 'none';
         footnote.style.display = 'none';
         return;
     }
 
-    /* رأس الجدول */
+    table.classList.toggle('transposed', state.orientation === 'employees-vertical');
+
+    if (state.orientation === 'items-vertical'){
+        renderItemsVertical(thead, tbody, tfoot, visibleItems);
+    } else {
+        renderEmployeesVertical(thead, tbody, tfoot, visibleItems);
+    }
+
+    /* ★ حُذفت كروت المجاميع بالكامل */
+
+    const warnings = [];
+    if (state.missingItems.length){
+        warnings.push(`<b>أصناف غير موجودة (${state.missingItems.length}):</b> ${state.missingItems.map(esc).join('، ')}`);
+    }
+    if (state.missingEmployees.length){
+        warnings.push(`<b>موظفون غير موجودين (${state.missingEmployees.length}):</b> ${state.missingEmployees.map(esc).join('، ')}`);
+    }
+    if (warnings.length){
+        warn.style.display = 'block';
+        warn.innerHTML = warnings.join('<br>');
+    } else warn.style.display = 'none';
+
+    const modeNote = state.filterMode === 'active'
+        ? 'وضع العرض: <b>الأصناف التي فيها حركة فقط</b>.'
+        : 'وضع العرض: <b>كل الأصناف</b>.';
+    const oriNote = state.orientation === 'items-vertical'
+        ? 'الاتجاه: الأصناف رأسياً × الموظفين أفقياً.'
+        : 'الاتجاه: الموظفون رأسياً × الأصناف أفقياً.';
+    footnote.innerHTML = `
+        الأرقام تمثل عدد الوجبات الجانبية لكل موظف حسب الأصناف المحددة فقط.
+        العدد <b>-</b> يعني لا توجد وجبات مسجلة.
+        ${modeNote} ${oriNote}`;
+    footnote.style.display = 'block';
+
+    document.getElementById('printedText').textContent = 'Printed: ' + dateStamp();
+    emptyEl.style.display = 'none';
+    tableWrap.style.display = 'block';
+}
+
+function renderItemsVertical(thead, tbody, tfoot, visibleItems){
     thead.innerHTML = `
         <tr>
             <th class="item-header">Item \\ Employee</th>
@@ -918,29 +979,22 @@ function render(){
             <th class="total-header">Total</th>
         </tr>`;
 
-    /* جسم الجدول */
     tbody.innerHTML = visibleItems.map(item => {
         const rowVals = EMPLOYEES.map(emp => {
             const v = state.matrix[item][emp] || 0;
-            return isZero(v)
-                ? `<td class="num dash">-</td>`
-                : `<td class="num">${fmt(v)}</td>`;
+            return isZero(v) ? `<td class="num dash">-</td>` : `<td class="num">${fmt(v)}</td>`;
         }).join('');
-
         const tot = state.itemTotals[item] || 0;
         const totCell = isZero(tot)
             ? `<td class="total-cell dash">-</td>`
             : `<td class="total-cell">${fmt(tot)}</td>`;
-
-        return `
-            <tr>
-                <td class="item-name" title="${esc(item)}">${esc(item)}</td>
-                ${rowVals}
-                ${totCell}
-            </tr>`;
+        return `<tr>
+            <td class="item-name" title="${esc(item)}">${esc(item)}</td>
+            ${rowVals}
+            ${totCell}
+        </tr>`;
     }).join('');
 
-    /* صف الإجمالي */
     tfoot.innerHTML = `
         <tr>
             <td class="item-name">Total</td>
@@ -950,65 +1004,52 @@ function render(){
             }).join('')}
             <td>${isZero(state.grandTotal) ? '-' : fmt(state.grandTotal)}</td>
         </tr>`;
+}
 
-    /* البطاقات الإحصائية */
-    stats.innerHTML = `
-        <div class="stat">
-            <div class="label">الأصناف المعروضة</div>
-            <div class="value">${fmt(visibleItems.length)} / ${fmt(ITEMS.length)}</div>
-        </div>
-        <div class="stat">
-            <div class="label">الموظفون</div>
-            <div class="value">${fmt(EMPLOYEES.length - state.missingEmployees.length)} / ${fmt(EMPLOYEES.length)}</div>
-        </div>
-        <div class="stat">
-            <div class="label">الإجمالي العام</div>
-            <div class="value">${isZero(state.grandTotal) ? '-' : fmt(state.grandTotal)}</div>
-        </div>`;
-    stats.style.display = 'flex';
+function renderEmployeesVertical(thead, tbody, tfoot, visibleItems){
+    thead.innerHTML = `
+        <tr>
+            <th class="item-header">Employee \\ Item</th>
+            ${visibleItems.map(it => `<th title="${esc(it)}">${esc(it)}</th>`).join('')}
+            <th class="total-header">Total</th>
+        </tr>`;
 
-    /* التحذيرات */
-    const warnings = [];
-    if (state.missingItems.length){
-        warnings.push(`<b>أصناف غير موجودة في الملف (${state.missingItems.length}):</b> ${state.missingItems.map(esc).join('، ')}`);
-    }
-    if (state.missingEmployees.length){
-        warnings.push(`<b>موظفون غير موجودين في الملف (${state.missingEmployees.length}):</b> ${state.missingEmployees.map(esc).join('، ')}`);
-    }
-    if (warnings.length){
-        warn.style.display = 'block';
-        warn.innerHTML = warnings.join('<br>');
-    } else {
-        warn.style.display = 'none';
-    }
+    tbody.innerHTML = EMPLOYEES.map(emp => {
+        const rowVals = visibleItems.map(it => {
+            const v = state.matrix[it][emp] || 0;
+            return isZero(v) ? `<td class="num dash">-</td>` : `<td class="num">${fmt(v)}</td>`;
+        }).join('');
+        const tot = state.empTotals[emp] || 0;
+        const totCell = isZero(tot)
+            ? `<td class="total-cell dash">-</td>`
+            : `<td class="total-cell">${fmt(tot)}</td>`;
+        return `<tr>
+            <td class="item-name" title="${esc(emp)}">${esc(emp)}</td>
+            ${rowVals}
+            ${totCell}
+        </tr>`;
+    }).join('');
 
-    /* الحاشية */
-    const modeNote = state.filterMode === 'active'
-        ? '<br>وضع العرض: <b>الأصناف التي فيها حركة فقط</b>.'
-        : '<br>وضع العرض: <b>كل الأصناف</b>.';
-    footnote.innerHTML = `
-        الأرقام تمثل عدد الوجبات الجانبية لكل موظف حسب الأصناف المحددة فقط.
-        الجدول معروض بشكل مقلوب: الأصناف على الجانب، وأسماء الموظفين في الأعلى.
-        العدد <b>-</b> يعني لا توجد وجبات مسجلة.${modeNote}`;
-    footnote.style.display = 'block';
-
-    document.getElementById('printedText').textContent = 'Printed: ' + dateStamp();
-    emptyEl.style.display = 'none';
-    tableWrap.style.display = 'block';
+    tfoot.innerHTML = `
+        <tr>
+            <td class="item-name">Total</td>
+            ${visibleItems.map(it => {
+                const v = state.itemTotals[it] || 0;
+                return isZero(v) ? `<td class="dash">-</td>` : `<td>${fmt(v)}</td>`;
+            }).join('')}
+            <td>${isZero(state.grandTotal) ? '-' : fmt(state.grandTotal)}</td>
+        </tr>`;
 }
 
 /* =========================================================
-   تحميل ملف Excel
+   تحميل ملف Excel — بدون عرض اسم الملف
    ========================================================= */
 async function loadFile(file){
     try{
-        document.getElementById('fileName').textContent = file.name;
-
         const buffer = await file.arrayBuffer();
         const wb = XLSX.read(buffer, { type: 'array' });
 
         let bestSheet = null;
-
         for (const sheetName of wb.SheetNames){
             const ws = wb.Sheets[sheetName];
             if (!ws) continue;
@@ -1036,16 +1077,15 @@ async function loadFile(file){
 }
 
 /* =========================================================
-   تصدير PDF — يعتمد على الجدول المعروض حالياً
+   تصدير PDF — صفحة واحدة
    ========================================================= */
 async function exportPDF(){
     if (!state.matrix || Object.keys(state.matrix).length === 0){
         alert('الرجاء تحميل ملف Excel أولاً.');
         return;
     }
-
     if (getVisibleItems().length === 0){
-        alert('لا توجد أصناف للتصدير في وضع "الحركة". اختر "كل الأصناف" أو حمّل ملفاً به بيانات.');
+        alert('لا توجد أصناف للتصدير في وضع "الحركة". اختر "كل الأصناف".');
         return;
     }
 
@@ -1056,10 +1096,12 @@ async function exportPDF(){
     const report = document.getElementById('reportArea');
     const wrap = document.getElementById('tableWrap');
 
-    const prevReportMaxWidth = report.style.maxWidth;
-    const prevReportWidth = report.style.width;
-    const prevWrapOverflow = wrap.style.overflow;
-    const prevWrapWidth = wrap.style.width;
+    const prev = {
+        maxWidth: report.style.maxWidth,
+        width: report.style.width,
+        overflow: wrap.style.overflow,
+        wrapWidth: wrap.style.width
+    };
 
     report.classList.add('pdf-mode');
     report.style.maxWidth = 'none';
@@ -1070,25 +1112,6 @@ async function exportPDF(){
     try{
         await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
-        const reportRect = report.getBoundingClientRect();
-        const reportTop = reportRect.top;
-
-        const theadEl = document.querySelector('#reportTable thead');
-        const tbodyEl = document.querySelector('#reportTable tbody');
-        const tfootEl = document.querySelector('#reportTable tfoot');
-
-        const theadRect = theadEl.getBoundingClientRect();
-        const theadTopCss = theadRect.top - reportTop;
-        const theadBottomCss = theadRect.bottom - reportTop;
-
-        const boundariesCss = [];
-        Array.from(tbodyEl.children).forEach(tr => {
-            const r = tr.getBoundingClientRect();
-            boundariesCss.push(r.bottom - reportTop);
-        });
-        const tfootRect = tfootEl.getBoundingClientRect();
-        boundariesCss.push(tfootRect.bottom - reportTop);
-
         const canvas = await html2canvas(report, {
             scale: 2,
             backgroundColor: '#ffffff',
@@ -1096,106 +1119,22 @@ async function exportPDF(){
             allowTaint: true
         });
 
-        const cssWidth = report.offsetWidth;
-        const canvasPxPerCssPx = canvas.width / cssWidth;
-
-        const theadTop    = Math.round(theadTopCss * canvasPxPerCssPx);
-        const theadBottom = Math.round(theadBottomCss * canvasPxPerCssPx);
-        const theadHeight = theadBottom - theadTop;
-
-        const boundariesPx = boundariesCss.map(b => Math.round(b * canvasPxPerCssPx));
-        boundariesPx.push(canvas.height);
-        boundariesPx.sort((a, b) => a - b);
-
-        const totalContentBottom = canvas.height;
-
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF('l', 'pt', 'a4');
         const pdfW = pdf.internal.pageSize.getWidth();
         const pdfH = pdf.internal.pageSize.getHeight();
-        const marginPt = 15;
+        const marginPt = 8;
         const usableW = pdfW - 2 * marginPt;
         const usableH = pdfH - 2 * marginPt;
 
-        const ptPerCanvasPx = usableW / canvas.width;
-        const pageHeightPx = usableH / ptPerCanvasPx;
+        const scale = Math.min(usableW / canvas.width, usableH / canvas.height);
+        const imgW = canvas.width * scale;
+        const imgH = canvas.height * scale;
+        const x = (pdfW - imgW) / 2;
+        const y = (pdfH - imgH) / 2;
 
-        let page1Bottom = theadBottom;
-        for (const b of boundariesPx){
-            if (b <= pageHeightPx) page1Bottom = b;
-            else break;
-        }
-
-        const availRowsHeightPx = pageHeightPx - theadHeight;
-
-        const pageSlices = [];
-        pageSlices.push({ isFirst: true, bodyY1: 0, bodyY2: page1Bottom });
-
-        let cursor = page1Bottom;
-        let safety = 0;
-        while (cursor < totalContentBottom && safety < 200){
-            safety++;
-            const nextLimit = cursor + availRowsHeightPx;
-            let pageBottom = null;
-
-            for (const b of boundariesPx){
-                if (b > cursor && b <= nextLimit) pageBottom = b;
-            }
-            if (pageBottom === null){
-                for (const b of boundariesPx){
-                    if (b > cursor){ pageBottom = b; break; }
-                }
-            }
-            if (pageBottom === null || pageBottom <= cursor) break;
-
-            pageSlices.push({
-                isFirst: false,
-                headerY1: theadTop,
-                headerY2: theadBottom,
-                bodyY1: cursor,
-                bodyY2: pageBottom
-            });
-            cursor = pageBottom;
-        }
-
-        for (let i = 0; i < pageSlices.length; i++){
-            const slice = pageSlices[i];
-            if (i > 0) pdf.addPage();
-
-            const bodyHeight = slice.bodyY2 - slice.bodyY1;
-            const headerHeight = slice.isFirst ? 0 : (slice.headerY2 - slice.headerY1);
-            const totalHeight = headerHeight + bodyHeight;
-
-            const pageCanvas = document.createElement('canvas');
-            pageCanvas.width = canvas.width;
-            pageCanvas.height = totalHeight;
-
-            const ctx = pageCanvas.getContext('2d');
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
-
-            let drawY = 0;
-
-            if (!slice.isFirst){
-                ctx.drawImage(
-                    canvas,
-                    0, slice.headerY1, canvas.width, headerHeight,
-                    0, 0,             canvas.width, headerHeight
-                );
-                drawY += headerHeight;
-            }
-
-            ctx.drawImage(
-                canvas,
-                0, slice.bodyY1, canvas.width, bodyHeight,
-                0, drawY,        canvas.width, bodyHeight
-            );
-
-            const imgData = pageCanvas.toDataURL('image/jpeg', 0.95);
-            const imgH = totalHeight * ptPerCanvasPx;
-
-            pdf.addImage(imgData, 'JPEG', marginPt, marginPt, usableW, imgH);
-        }
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        pdf.addImage(imgData, 'JPEG', x, y, imgW, imgH);
 
         pdf.save(`Side_Items_By_Agent_${dateStamp()}.pdf`);
 
@@ -1204,31 +1143,34 @@ async function exportPDF(){
         alert('حدث خطأ أثناء تصدير PDF:\n' + err.message);
     }finally{
         report.classList.remove('pdf-mode');
-        report.style.maxWidth = prevReportMaxWidth;
-        report.style.width = prevReportWidth;
-        wrap.style.overflow = prevWrapOverflow;
-        wrap.style.width = prevWrapWidth;
+        report.style.maxWidth = prev.maxWidth;
+        report.style.width = prev.width;
+        wrap.style.overflow = prev.overflow;
+        wrap.style.width = prev.wrapWidth;
         btn.disabled = false;
-        btn.textContent = '📄 تصدير PDF (أفقي)';
+        btn.innerHTML = '<span class="btn-emoji">📄</span> PDF';
     }
 }
 
 /* =========================================================
-   تصدير Excel — يطبق نفس الفلتر
+   تصدير Excel
    ========================================================= */
 function exportXLSX(){
     if (!state.matrix || Object.keys(state.matrix).length === 0){
         alert('الرجاء تحميل ملف Excel أولاً.');
         return;
     }
-
     const visibleItems = getVisibleItems();
     if (visibleItems.length === 0){
         alert('لا توجد أصناف للتصدير في وضع "الحركة". اختر "كل الأصناف".');
         return;
     }
 
-    const aoa = [
+    const oriLabel = state.orientation === 'items-vertical'
+        ? 'Items vertical / Employees horizontal'
+        : 'Employees vertical / Items horizontal';
+
+    const header = [
         ['شركة نايف للأغذية'],
         ['Side Items By Agent'],
         ['Operator', 'ALL'],
@@ -1236,28 +1178,52 @@ function exportXLSX(){
         ['Period', state.period || ''],
         ['Printed', dateStamp()],
         ['Filter', state.filterMode === 'active' ? 'Active items only' : 'All items'],
-        [],
-        ['Item \\ Employee', ...EMPLOYEES, 'Total'],
-        ...visibleItems.map(item => [
-            item,
-            ...EMPLOYEES.map(emp => {
-                const v = state.matrix[item][emp] || 0;
-                return isZero(v) ? '-' : v;
-            }),
-            isZero(state.itemTotals[item]) ? '-' : (state.itemTotals[item] || 0)
-        ]),
-        ['Total', ...EMPLOYEES.map(emp => {
-            const v = state.empTotals[emp] || 0;
-            return isZero(v) ? '-' : v;
-        }), isZero(state.grandTotal) ? '-' : state.grandTotal]
+        ['Orientation', oriLabel],
+        []
     ];
 
+    let bodyRows;
+    if (state.orientation === 'items-vertical'){
+        bodyRows = [
+            ['Item \\ Employee', ...EMPLOYEES, 'Total'],
+            ...visibleItems.map(item => [
+                item,
+                ...EMPLOYEES.map(emp => {
+                    const v = state.matrix[item][emp] || 0;
+                    return isZero(v) ? '-' : v;
+                }),
+                isZero(state.itemTotals[item]) ? '-' : (state.itemTotals[item] || 0)
+            ]),
+            ['Total', ...EMPLOYEES.map(emp => {
+                const v = state.empTotals[emp] || 0;
+                return isZero(v) ? '-' : v;
+            }), isZero(state.grandTotal) ? '-' : state.grandTotal]
+        ];
+    } else {
+        bodyRows = [
+            ['Employee \\ Item', ...visibleItems, 'Total'],
+            ...EMPLOYEES.map(emp => [
+                emp,
+                ...visibleItems.map(it => {
+                    const v = state.matrix[it][emp] || 0;
+                    return isZero(v) ? '-' : v;
+                }),
+                isZero(state.empTotals[emp]) ? '-' : (state.empTotals[emp] || 0)
+            ]),
+            ['Total', ...visibleItems.map(it => {
+                const v = state.itemTotals[it] || 0;
+                return isZero(v) ? '-' : v;
+            }), isZero(state.grandTotal) ? '-' : state.grandTotal]
+        ];
+    }
+
+    const aoa = [...header, ...bodyRows];
     const ws = XLSX.utils.aoa_to_sheet(aoa);
-    ws['!cols'] = [
-        { wch: 30 },
-        ...EMPLOYEES.map(() => ({ wch: 14 })),
-        { wch: 12 }
-    ];
+    if (state.orientation === 'items-vertical'){
+        ws['!cols'] = [{ wch: 30 }, ...EMPLOYEES.map(() => ({ wch: 14 })), { wch: 12 }];
+    } else {
+        ws['!cols'] = [{ wch: 30 }, ...visibleItems.map(() => ({ wch: 12 })), { wch: 12 }];
+    }
 
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'SideItems');
@@ -1274,11 +1240,11 @@ document.getElementById('fileInput').addEventListener('change', e => {
 
 document.getElementById('btnPdf').addEventListener('click', exportPDF);
 document.getElementById('btnXlsx').addEventListener('click', exportXLSX);
+document.getElementById('btnOrientation').addEventListener('click', toggleOrientation);
 
-/* ★ فلتر الأصناف */
 document.querySelectorAll('input[name="itemFilter"]').forEach(inp => {
     inp.addEventListener('change', () => {
-        document.querySelectorAll('.filter-group label').forEach(l => l.classList.remove('active'));
+        document.querySelectorAll('.segmented label').forEach(l => l.classList.remove('active'));
         inp.closest('label').classList.add('active');
         state.filterMode = inp.value;
         render();
@@ -1287,6 +1253,7 @@ document.querySelectorAll('input[name="itemFilter"]').forEach(inp => {
 
 document.getElementById('printedText').textContent = 'Printed: ' + dateStamp();
 
+updateOrientationUI();
 loadLogo();
 </script>
 </body>
