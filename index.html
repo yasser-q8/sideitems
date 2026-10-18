@@ -66,12 +66,13 @@
         display:flex; justify-content:space-between; align-items:flex-start;
         gap:20px; padding-bottom:16px; border-bottom:3px solid var(--red);
     }
-    .brand{display:flex; align-items:center; gap:14px;}
+    .brand{display:flex; align-items:center; gap:16px;}
     .brand img{
-        width:66px; height:66px; object-fit:contain;
-        border:1px solid #eee; border-radius:10px; background:#fff; padding:4px;
+        width:88px; height:88px; object-fit:contain;
+        border:1px solid #eee; border-radius:12px; background:#fff; padding:5px;
+        display:block;
     }
-    .brand h1{margin:0; font-size:1.15rem; color:var(--red); font-weight:800;}
+    .brand h1{margin:0; font-size:1.2rem; color:var(--red); font-weight:800;}
     .brand p{margin:4px 0 0; font-size:.78rem; color:var(--muted); direction:ltr; letter-spacing:.4px;}
 
     .meta{text-align:left; direction:ltr; font-size:.76rem; color:var(--muted); line-height:1.75;}
@@ -86,26 +87,133 @@
     .stat .label{font-size:.72rem; color:var(--muted); margin-bottom:5px;}
     .stat .value{font-size:1.18rem; font-weight:800; color:var(--red); direction:ltr;}
 
-    /* ============ الجدول ============ */
-    table{width:100%; border-collapse:collapse; margin-top:18px; font-size:.86rem;}
-    thead th{
-        background:var(--red); color:#fff; padding:12px;
-        font-weight:700; font-size:.8rem; text-align:center;
+    /* ============ الجدول العريض ============ */
+    .table-wrap{
+        margin-top:18px;
+        overflow-x:auto;
+        border:1px solid var(--line);
+        border-radius:10px;
+        background:#fff;
+    }
+
+    table.report-table{
+        border-collapse:separate;
+        border-spacing:0;
+        width:max-content;
+        min-width:100%;
+        font-size:0.74rem;
+        direction:rtl;
+    }
+
+    table.report-table thead th{
+        background:var(--red);
+        color:#fff;
+        font-weight:700;
+        font-size:0.62rem;
+        line-height:1.25;
+        padding:8px 5px;
+        text-align:center;
+        vertical-align:bottom;
+        white-space:normal;
+        word-break:break-word;
+        min-width:58px;
+        max-width:70px;
+        height:auto;
+        min-height:88px;
+        position:sticky;
+        top:0;
+        z-index:3;
+        border-bottom:2px solid var(--red-dark);
         border-left:1px solid rgba(255,255,255,.15);
     }
-    thead th:first-child{border-left:none;}
-    thead th.col-name{text-align:right;}
-    tbody td{padding:11px 12px; border-bottom:1px solid var(--line); text-align:center;}
-    tbody td.col-name{text-align:right; font-weight:700;}
-    tbody tr:nth-child(even){background:#fbfbfc;}
-    tbody tr:hover{background:#fdf1f3;}
-    .num{direction:ltr; font-variant-numeric:tabular-nums;}
-    tbody td.strong{font-weight:800; color:var(--red);}
-    tfoot td{
-        padding:12px; background:#fdecef; font-weight:800; text-align:center;
-        color:var(--red-dark); border-top:2px solid var(--red); direction:ltr;
+    table.report-table thead th:first-child{border-left:none;}
+
+    table.report-table thead th.item-header{
+        position:sticky;
+        top:0;
+        right:0;
+        z-index:5;
+        text-align:right;
+        direction:rtl;
+        min-width:175px;
+        max-width:175px;
+        background:var(--red-dark);
+        border-left:2px solid #fff;
+        font-size:0.7rem;
     }
-    tfoot td.col-name{text-align:right; direction:rtl;}
+
+    table.report-table thead th.total-header{
+        background:var(--red-dark);
+        min-width:58px;
+        max-width:58px;
+    }
+
+    table.report-table tbody td{
+        padding:6px 5px;
+        text-align:center;
+        border-bottom:1px solid #f1f2f4;
+        direction:ltr;
+        font-variant-numeric:tabular-nums;
+    }
+
+    table.report-table tbody td.item-name{
+        position:sticky;
+        right:0;
+        z-index:2;
+        text-align:right;
+        direction:ltr;
+        font-weight:600;
+        font-size:0.7rem;
+        color:var(--ink);
+        background:#fff;
+        border-left:1px solid var(--line);
+        min-width:175px;
+        max-width:175px;
+        white-space:normal;
+        word-break:break-word;
+        line-height:1.3;
+    }
+
+    table.report-table tbody tr:nth-child(even){background:#fafbfc;}
+    table.report-table tbody tr:nth-child(even) td.item-name{background:#fafbfc;}
+    table.report-table tbody tr:hover{background:#fdf1f3;}
+    table.report-table tbody tr:hover td.item-name{background:#fdf1f3;}
+
+    table.report-table tbody td.total-cell{
+        font-weight:700;
+        color:var(--red);
+        background:#fff9fa;
+    }
+    table.report-table tbody tr:nth-child(even) td.total-cell{background:#fdf3f5;}
+
+    table.report-table td.dash{
+        color:#c3c7ce;
+        font-weight:400;
+    }
+
+    table.report-table tfoot td{
+        padding:9px 5px;
+        font-weight:800;
+        text-align:center;
+        background:#fdecef;
+        color:var(--red-dark);
+        border-top:2px solid var(--red);
+        direction:ltr;
+        font-variant-numeric:tabular-nums;
+        font-size:0.72rem;
+    }
+    table.report-table tfoot td.item-name{
+        position:sticky;
+        right:0;
+        z-index:2;
+        text-align:right;
+        direction:rtl;
+        background:#fdecef;
+        border-left:2px solid var(--red);
+        min-width:175px;
+        max-width:175px;
+    }
+    table.report-table tfoot td.dash{color:#b9848f; font-weight:700;}
 
     .footnote{
         margin-top:16px; font-size:.72rem; color:var(--muted);
@@ -115,13 +223,68 @@
         margin-top:14px; padding:10px 14px; border-radius:9px;
         background:#fff7ed; border:1px solid #fed7aa;
         color:#9a3412; font-size:.78rem; font-weight:600;
+        line-height:1.7;
     }
+    .warn b{color:#7c2d12;}
 
     /* ============ حالة عدم وجود بيانات ============ */
     .empty{
         text-align:center; padding:55px 20px; color:var(--muted); font-size:.9rem;
     }
     .empty b{display:block; color:var(--ink); font-size:1rem; margin-bottom:8px;}
+
+    /* ============ وضع PDF ============ */
+    .report.pdf-mode .table-wrap{
+        overflow:visible;
+        border:none;
+        border-radius:0;
+    }
+    .report.pdf-mode table.report-table{
+        font-size:0.55rem;
+    }
+    .report.pdf-mode table.report-table thead th{
+        font-size:0.5rem;
+        padding:4px 2px;
+        min-width:42px;
+        max-width:42px;
+        min-height:70px;
+        position:static !important;
+    }
+    .report.pdf-mode table.report-table thead th.item-header{
+        min-width:140px;
+        max-width:140px;
+        font-size:0.58rem;
+    }
+    .report.pdf-mode table.report-table thead th.total-header{
+        min-width:42px;
+        max-width:42px;
+    }
+    .report.pdf-mode table.report-table tbody td{
+        padding:3px 2px;
+        font-size:0.55rem;
+    }
+    .report.pdf-mode table.report-table tbody td.item-name{
+        position:static !important;
+        font-size:0.58rem;
+        min-width:140px;
+        max-width:140px;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+    }
+    .report.pdf-mode table.report-table tfoot td{
+        padding:5px 2px;
+        font-size:0.58rem;
+    }
+    .report.pdf-mode table.report-table tfoot td.item-name{
+        position:static !important;
+        min-width:140px;
+        max-width:140px;
+    }
+
+    /* ★ إخفاء كروت المجاميع وأسطر البيانات الوصفية في وضع PDF */
+    .report.pdf-mode .stats{ display:none !important; }
+    .report.pdf-mode .meta-line{ display:none !important; }
 
     /* ============ توقيع المطور (إطار أحمر فقط - أصغر 25%) ============ */
     .signature-card{
@@ -167,6 +330,7 @@
         .report{padding:20px 16px;}
         .report-head{flex-direction:column;}
         .meta{text-align:right; direction:ltr;}
+        .brand img{width:72px; height:72px;}
     }
 
     @media print{
@@ -184,7 +348,7 @@
         📂 تحميل ملف Excel (xlsx / xlsm)
         <input type="file" id="fileInput" accept=".xlsx,.xlsm" hidden>
     </label>
-    <button id="btnPdf" class="btn btn-pdf">📄 تصدير PDF</button>
+    <button id="btnPdf" class="btn btn-pdf">📄 تصدير PDF (أفقي)</button>
     <button id="btnXlsx" class="btn btn-xls">📊 تصدير Excel</button>
     <span class="file-name" id="fileName">لم يتم تحميل أي ملف</span>
 </div>
@@ -194,8 +358,7 @@
 
     <div class="report-head">
         <div class="brand">
-            <img id="logo" src="https://i.postimg.cc/NM2zJWZD/NAIF-LOGO.jpg"
-                 crossorigin="anonymous" alt="Naif Foods">
+            <img id="logo" alt="Naif Foods">
             <div>
                 <h1>شركة نايف للأغذية</h1>
                 <p id="branchText">Kuwait - Naif Chicken</p>
@@ -203,10 +366,10 @@
         </div>
         <div class="meta">
             <div class="title">Side Items By Agent</div>
-            <div>Operator: ALL</div>
-            <div>Subgroup: Appetizeer___Z</div>
-            <div id="periodText">From — to —</div>
-            <div id="printedText"></div>
+            <div class="meta-line">Operator: ALL</div>
+            <div class="meta-line">Subgroup: Appetizeer___Z</div>
+            <div class="meta-line" id="periodText">From — to —</div>
+            <div class="meta-line" id="printedText"></div>
         </div>
     </div>
 
@@ -217,16 +380,20 @@
         قم بتحميل ملف Excel (xlsx / xlsm) لعرض التقرير المختصر.
     </div>
 
-    <table id="reportTable" style="display:none;">
-        <thead></thead>
-        <tbody></tbody>
-        <tfoot></tfoot>
-    </table>
+    <div class="table-wrap" id="tableWrap" style="display:none;">
+        <table class="report-table" id="reportTable">
+            <thead></thead>
+            <tbody></tbody>
+            <tfoot></tfoot>
+        </table>
+    </div>
 
     <div class="warn" id="warnBox" style="display:none;"></div>
 
     <div class="footnote" id="footnote" style="display:none;">
-        الأرقام تمثل عدد الوجبات الجانبية لكل موظف حسب الوجبات المحددة فقط.
+        الأرقام تمثل عدد الوجبات الجانبية لكل موظف حسب الأصناف المحددة فقط.
+        الجدول معروض بشكل مقلوب: الأصناف على الجانب، وأسماء الموظفين في الأعلى.
+        العدد <b>-</b> يعني لا توجد وجبات مسجلة.
     </div>
 </div>
 
@@ -238,24 +405,148 @@
 
 <script>
 /* =========================================================
-   الإعدادات — الموظفون والوجبات المطلوبة (قابلة للتعديل)
+   الشعار — تحميل موثوق مع بدائل متعددة
    ========================================================= */
-const TARGET_EMPLOYEES = [
-    'abdalrahman ahmed mohamed',
-    'Ahmad Mahmoud Reyadh'
-];
-const TARGET_ITEMS = [
-    '- 7 up -',
-    '- pepsi -'
+const LOGO_URL = 'https://i.postimg.cc/NM2zJWZD/NAIF-LOGO.jpg';
+
+const FALLBACK_LOGO_SVG = `
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">
+    <defs>
+        <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#C8102E"/>
+            <stop offset="100%" stop-color="#9B0C23"/>
+        </linearGradient>
+    </defs>
+    <rect width="160" height="160" rx="16" fill="url(#g1)"/>
+    <circle cx="80" cy="58" r="26" fill="none" stroke="#ffffff" stroke-width="3" opacity="0.85"/>
+    <path d="M62 58 L74 58 L78 48 L84 68 L88 58 L98 58" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="80" y="112" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="1">NAIF</text>
+    <text x="80" y="132" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="3">FOODS</text>
+</svg>`;
+
+function setFallbackLogo(){
+    const img = document.getElementById('logo');
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(FALLBACK_LOGO_SVG);
+}
+
+function loadLogo(){
+    const target = document.getElementById('logo');
+
+    const attempt = new Image();
+    attempt.crossOrigin = 'anonymous';
+
+    attempt.onload = function(){
+        try{
+            const c = document.createElement('canvas');
+            c.width  = attempt.naturalWidth  || 160;
+            c.height = attempt.naturalHeight || 160;
+            c.getContext('2d').drawImage(attempt, 0, 0);
+            target.src = c.toDataURL('image/png');
+        }catch(e){
+            target.removeAttribute('crossorigin');
+            target.src = LOGO_URL + '?v=' + Date.now();
+        }
+    };
+
+    attempt.onerror = function(){
+        const plain = new Image();
+        plain.onload = function(){
+            target.removeAttribute('crossorigin');
+            target.src = LOGO_URL + '?v=' + Date.now();
+        };
+        plain.onerror = function(){
+            setFallbackLogo();
+        };
+        plain.src = LOGO_URL + '?v=' + Date.now();
+    };
+
+    attempt.src = LOGO_URL;
+}
+
+/* =========================================================
+   الأصناف (36) — من ملف الأصناف المرفق
+   ========================================================= */
+const ITEMS = [
+    'Cheesy Fries',
+    'Chick Fries',
+    'COLE SLAW Large _Z',
+    'COLE SLAW Small _Z',
+    'Fattoush _Z',
+    'Hummus _Z',
+    'Large Barbecue Sauce',
+    'Large Cheddar Sauce',
+    'Large Chilli Mayo Sauce',
+    'large dynamite garlic',
+    'Large Honey Mustard',
+    'Large Maboug Sauce',
+    'Large Mayo Ketchup',
+    'Large Mayonnaise Sauce',
+    'Large Peri Peri Sauce',
+    'Large Ranch Sauce',
+    'Large Spicy Cheese sauce',
+    'large sweet spicy sauce',
+    'mutabbal',
+    'ONION RINGS _Z',
+    'ONION RINGS FAMILY_Z',
+    'Puri Bread_Z',
+    'Rocca Salad _Z',
+    'Tabbouleh _Z',
+    'XLarge Barbecue Sauce',
+    'xlarge cheddar sauce',
+    'XLarge Chilli Mayo Sauce',
+    'XLarge Honey Mustard',
+    'xlarge maboug sauce',
+    'xlarge mayo ketchup',
+    'xlarge mayonnaise sauce',
+    'XLarge Peri Peri Sauce',
+    'xlarge pink sauce',
+    'xlarge ranch sauce',
+    'xlarge spicy cheese sauce',
+    'xlarge sweet spicy sauce'
 ];
 
-/* الحالة العامة */
+/* =========================================================
+   أسماء الموظفين (24)
+   ========================================================= */
+const EMPLOYEES = [
+    'Ahmed Hassan',
+    'AHMED HELMI ABD EL MONEM EL',
+    'Ahmed rubi',
+    'Ahmed Sami',
+    'AHMED SAMIR ALSAKA',
+    'Fayez Ibrahim Ashry',
+    'GAMAL MOHAMED AHMED',
+    'Gamal Nasr Mohamed',
+    'HAMED ABDELKADER MOHAMED',
+    'HISHAM GALAL MOHAMED',
+    'ibrahim gomaa eisa',
+    'ibrahim nagy ibrahim',
+    'KAREM RAFAT MAGHRABI',
+    'KHALED AHMED HAMDI MAHHOUD GABALLA',
+    'MAHMOUD ELSAYED AHMED EISA',
+    'MAHMOUD HAMDI MESBAH MOHAMMED',
+    'Mahmoud Najem',
+    'Moawad Mohamed Ahmad Hassan',
+    'mohamed ahmed mohamed ahmed',
+    'Mohamed Awad Abood',
+    'Mohammed Mohammed Abdulla',
+    'omar essam',
+    'SALEM QURSHI MOHAMED',
+    'SAYED METAWE MAHMOUD'
+];
+
+/* =========================================================
+   الحالة العامة
+   ========================================================= */
 const state = {
-    items: [],
-    rows: [],
-    totals: {},
+    matrix: {},
+    itemTotals: {},
+    empTotals: {},
     grandTotal: 0,
-    period: ''
+    period: '',
+    branch: '',
+    missingItems: [],
+    missingEmployees: []
 };
 
 /* =========================================================
@@ -271,17 +562,6 @@ function normalize(v){
         .toLowerCase();
 }
 
-function compact(v){
-    return normalize(v).replace(/[\s\-_]+/g, '');
-}
-
-function prettyItem(it){
-    return normalize(it)
-        .split(' ')
-        .map(w => (w && isNaN(w)) ? w.charAt(0).toUpperCase() + w.slice(1) : w)
-        .join(' ');
-}
-
 function toNum(v){
     if (v === null || v === undefined || v === '') return 0;
     const n = Number(String(v).replace(/,/g, '').trim());
@@ -290,6 +570,15 @@ function toNum(v){
 
 function fmt(n){
     return Number(n || 0).toLocaleString('en-US');
+}
+
+function cellText(v){
+    const n = Number(v || 0);
+    return n ? fmt(n) : '-';
+}
+
+function isZero(v){
+    return !Number(v || 0);
 }
 
 function esc(s){
@@ -315,49 +604,75 @@ function isDateLike(v){
 }
 
 /* =========================================================
-   مطابقة أسماء الموظفين (كلمة بكلمة)
+   مطابقة أسماء الموظفين
    ========================================================= */
-function nameMatches(cellValue, target){
+const EMPLOYEE_DATA = EMPLOYEES.map(name => {
+    const normalized = normalize(name);
+    const words = normalized.split(' ').filter(Boolean);
+    return { name, normalized, words, set: new Set(words) };
+});
+
+function findBestEmployeeMatch(cellValue){
     const n = normalize(cellValue);
-    const t = normalize(target);
-    if (!n || !t) return false;
-    if (n === t) return true;
+    if (!n) return null;
 
     const nWords = n.split(' ').filter(Boolean);
-    const tWords = t.split(' ').filter(Boolean);
-    if (!nWords.length || !tWords.length) return false;
+    if (!nWords.length) return null;
+    const nSet = new Set(nWords);
 
-    if (tWords.every(w => nWords.includes(w))) return true;
-    if (nWords.every(w => tWords.includes(w))) return true;
-    return false;
+    let bestKey = null;
+    let bestScore = 0;
+
+    for (const emp of EMPLOYEE_DATA){
+        let score = 0;
+
+        if (n === emp.normalized){
+            score = 1000;
+        } else {
+            const allTargetInCell = emp.words.every(w => nSet.has(w));
+            const allCellInTarget = nWords.every(w => emp.set.has(w));
+
+            if (allTargetInCell && allCellInTarget){
+                score = 800;
+            } else if (allTargetInCell){
+                const extra = nWords.length - emp.words.length;
+                score = Math.max(100, 500 - extra * 10);
+            } else if (allCellInTarget && nWords.length >= 2){
+                const extra = emp.words.length - nWords.length;
+                score = Math.max(50, 300 - extra * 10);
+            }
+        }
+
+        if (score > bestScore){
+            bestScore = score;
+            bestKey = emp.name;
+        }
+    }
+    return bestKey;
 }
 
 /* =========================================================
-   البحث عن أعمدة الوجبات في صف معيّن
-   (مطابقة تامة ثم مطابقة مضغوطة — بدون مطابقة جزئية
-    لتجنب الخلط بين "pepsi" و "diet pepsi")
+   البحث عن أعمدة الأصناف في صف معيّن
    ========================================================= */
 function findItemColumns(row){
     const res = {};
     const norm = row.map(cell => normalize(cell));
     const comp = norm.map(n => n.replace(/[\s\-_]+/g, ''));
 
-    TARGET_ITEMS.forEach(it => {
+    ITEMS.forEach(it => {
         const t  = normalize(it);
         const tc = t.replace(/[\s\-_]+/g, '');
+        if (!tc) return;
 
         let idx = norm.findIndex(n => n && n === t);
-        if (idx !== -1) { res[it] = idx; return; }
+        if (idx !== -1){ res[it] = idx; return; }
 
         idx = comp.findIndex(n => n && n === tc);
-        if (idx !== -1) { res[it] = idx; }
+        if (idx !== -1){ res[it] = idx; }
     });
     return res;
 }
 
-/* =========================================================
-   إيجاد صف العناوين (الصف الذي يحتوي على أكبر عدد من الوجبات)
-   ========================================================= */
 function findHeaderRow(rows){
     let best = { idx: -1, cols: {}, score: 0 };
     for (let r = 0; r < rows.length; r++){
@@ -366,33 +681,27 @@ function findHeaderRow(rows){
         if (score > best.score){
             best = { idx: r, cols, score };
         }
-        if (score === TARGET_ITEMS.length) break;
+        if (score === ITEMS.length) break;
     }
     return best;
 }
 
-/* =========================================================
-   تحديد عمود أسماء الموظفين تلقائياً
-   (يفضّل العمود الذي يحتوي على أسماء الموظفين المطلوبين)
-   ========================================================= */
 function detectNameColumn(rows, headerRowIdx, itemCols){
     const used = new Set(Object.values(itemCols));
     const maxCols = Math.max(...rows.map(r => (r ? r.length : 0)), 0);
 
-    let best = -1, bestScore = -Infinity;
     let bestTargetCol = -1, bestTargetHits = 0;
+    let bestTextCol = -1, bestTextScore = 0;
 
     for (let c = 0; c < maxCols; c++){
         if (used.has(c)) continue;
 
-        let textCount = 0, totalCount = 0, totalLen = 0;
+        let targetHits = 0, textCount = 0, totalCount = 0;
         const uniqueTexts = new Set();
-        let targetHits = 0;
 
         for (let r = headerRowIdx + 1; r < rows.length; r++){
             const v = rows[r] ? rows[r][c] : '';
             if (v === '' || v === null || v === undefined) continue;
-
             const s = String(v).trim();
             if (!s) continue;
             totalCount++;
@@ -403,12 +712,9 @@ function detectNameColumn(rows, headerRowIdx, itemCols){
             if (!isNaN(Number(s))) continue;
 
             textCount++;
-            totalLen += s.length;
             uniqueTexts.add(lower);
 
-            for (const target of TARGET_EMPLOYEES){
-                if (nameMatches(s, target)) targetHits++;
-            }
+            if (findBestEmployeeMatch(s)) targetHits++;
         }
 
         if (targetHits > bestTargetHits){
@@ -416,103 +722,88 @@ function detectNameColumn(rows, headerRowIdx, itemCols){
             bestTargetCol = c;
         }
 
-        if (textCount === 0) continue;
-        const textRatio = textCount / totalCount;
-        if (textRatio < 0.4) continue;
-
-        const avgLen = totalLen / textCount;
-        const score = uniqueTexts.size * 10 + avgLen * 3;
-        if (score > bestScore){ bestScore = score; best = c; }
+        if (textCount > 0 && totalCount > 0){
+            const ratio = textCount / totalCount;
+            if (ratio >= 0.4){
+                const score = uniqueTexts.size * 10 + textCount;
+                if (score > bestTextScore){
+                    bestTextScore = score;
+                    bestTextCol = c;
+                }
+            }
+        }
     }
 
     if (bestTargetCol !== -1) return bestTargetCol;
-    return best;
+    return bestTextCol;
 }
 
 /* =========================================================
-   بناء التقرير من صفوف الشيت
+   بناء التقرير
    ========================================================= */
 function buildReport(rows){
-    // --- 1) صف العناوين ---
     const header = findHeaderRow(rows);
     if (header.idx === -1 || header.score === 0){
-        throw new Error('لم يتم العثور على أعمدة الوجبات المطلوبة (7 up / pepsi) داخل الملف.');
+        throw new Error('لم يتم العثور على أعمدة الأصناف داخل الملف. تأكد من مطابقة أسماء الأصناف.');
     }
+
     const itemCols = header.cols;
 
-    // --- 2) عمود الأسماء ---
     const nameCol = detectNameColumn(rows, header.idx, itemCols);
     if (nameCol === -1){
         throw new Error('لم يتم العثور على عمود أسماء الموظفين داخل الملف.');
     }
 
-    // --- 3) تجميع بيانات الموظفين المطلوبين ---
-    const agg = TARGET_EMPLOYEES.map(name => ({
-        requested: name,
-        display: name,
-        matched: false,
-        values: {}
-    }));
+    const employeeRows = {};
+    EMPLOYEES.forEach(emp => employeeRows[emp] = []);
 
     for (let r = header.idx + 1; r < rows.length; r++){
         const row = rows[r];
         if (!row) continue;
 
-        const rawName = row[nameCol];
-        if (rawName === undefined || rawName === null || rawName === '') continue;
+        const nameCell = row[nameCol];
+        if (nameCell === undefined || nameCell === null || nameCell === '') continue;
 
-        const s = String(rawName).trim();
+        const s = String(nameCell).trim();
+        if (!s) continue;
         const lower = s.toLowerCase();
         if (lower === 'total' || lower === 'grand total') continue;
 
-        // البحث عن الموظف المطابق
-        let matchIdx = -1;
-        for (let i = 0; i < TARGET_EMPLOYEES.length; i++){
-            if (nameMatches(s, TARGET_EMPLOYEES[i])){ matchIdx = i; break; }
+        const matched = findBestEmployeeMatch(s);
+        if (matched){
+            employeeRows[matched].push(r);
         }
-        if (matchIdx === -1) continue;
-
-        const item = agg[matchIdx];
-        if (!item.matched){
-            item.matched = true;
-            item.display = s;
-        }
-
-        TARGET_ITEMS.forEach(it => {
-            const c = itemCols[it];
-            if (c === undefined) return;
-            item.values[it] = (item.values[it] || 0) + toNum(row[c]);
-        });
     }
 
-    const anyMatched = agg.some(a => a.matched);
-    if (!anyMatched){
-        throw new Error('لم يتم العثور على أي من الموظفين المطلوبين في الملف. تأكد من أسماء الموظفين أو جرّب ملفاً آخر.');
-    }
-
-    // --- 4) حساب الإجماليات ---
-    const foundItems = TARGET_ITEMS.filter(it => itemCols[it] !== undefined);
-    const totals = {};
-    foundItems.forEach(it => totals[it] = 0);
-
-    const outRows = agg.map(item => {
-        let total = 0;
-        foundItems.forEach(it => {
-            const v = item.values[it] || 0;
-            totals[it] += v;
-            total += v;
+    const matrix = {};
+    ITEMS.forEach(item => {
+        matrix[item] = {};
+        const col = itemCols[item];
+        EMPLOYEES.forEach(emp => {
+            let sum = 0;
+            if (col !== undefined){
+                employeeRows[emp].forEach(r => {
+                    sum += toNum(rows[r][col]);
+                });
+            }
+            matrix[item][emp] = sum;
         });
-        return {
-            display: item.display,
-            matched: item.matched,
-            values: item.values,
-            total
-        };
     });
 
-    const grandTotal = foundItems.reduce((s, it) => s + totals[it], 0);
+    const itemTotals = {};
+    const empTotals = {};
+    let grandTotal = 0;
 
-    // --- 5) استخراج الفترة والفرع ---
+    ITEMS.forEach(item => {
+        itemTotals[item] = 0;
+        EMPLOYEES.forEach(emp => {
+            const v = matrix[item][emp] || 0;
+            itemTotals[item] += v;
+            empTotals[emp] = (empTotals[emp] || 0) + v;
+        });
+        grandTotal += itemTotals[item];
+    });
+
     let period = '', branch = '';
     for (const row of rows){
         if (!row) continue;
@@ -523,15 +814,14 @@ function buildReport(rows){
         }
     }
 
-    state.items = TARGET_ITEMS.map(it => ({
-        key: it,
-        pretty: prettyItem(it),
-        found: itemCols[it] !== undefined
-    }));
-    state.rows = outRows;
-    state.totals = totals;
+    state.matrix = matrix;
+    state.itemTotals = itemTotals;
+    state.empTotals = empTotals;
     state.grandTotal = grandTotal;
     state.period = period;
+    state.branch = branch;
+    state.missingItems = ITEMS.filter(it => itemCols[it] === undefined);
+    state.missingEmployees = EMPLOYEES.filter(emp => employeeRows[emp].length === 0);
 
     if (period) document.getElementById('periodText').textContent = period;
     if (branch) document.getElementById('branchText').textContent = branch;
@@ -541,75 +831,89 @@ function buildReport(rows){
    عرض التقرير
    ========================================================= */
 function render(){
-    const foundItems = state.items.filter(it => it.found);
-    const missingItems = state.items.filter(it => !it.found);
-
-    // رأس الجدول
     const thead = document.querySelector('#reportTable thead');
+    const tbody = document.querySelector('#reportTable tbody');
+    const tfoot = document.querySelector('#reportTable tfoot');
+
     thead.innerHTML = `
         <tr>
-            <th class="col-name">Employee</th>
-            ${foundItems.map(it => `<th>${esc(it.pretty)}</th>`).join('')}
-            <th>Total</th>
+            <th class="item-header">Item \\ Employee</th>
+            ${EMPLOYEES.map(emp => `<th title="${esc(emp)}">${esc(emp)}</th>`).join('')}
+            <th class="total-header">Total</th>
         </tr>`;
 
-    // الصفوف
-    const tbody = document.querySelector('#reportTable tbody');
-    tbody.innerHTML = state.rows.map(r => `
-        <tr>
-            <td class="col-name">${esc(r.display)}</td>
-            ${foundItems.map(it => `<td class="num">${fmt(r.values[it.key] || 0)}</td>`).join('')}
-            <td class="num strong">${fmt(r.total)}</td>
-        </tr>`).join('');
+    tbody.innerHTML = ITEMS.map(item => {
+        const rowVals = EMPLOYEES.map(emp => {
+            const v = state.matrix[item][emp] || 0;
+            return isZero(v)
+                ? `<td class="num dash">-</td>`
+                : `<td class="num">${fmt(v)}</td>`;
+        }).join('');
 
-    // الإجمالي
-    const tfoot = document.querySelector('#reportTable tfoot');
+        const tot = state.itemTotals[item] || 0;
+        const totCell = isZero(tot)
+            ? `<td class="total-cell dash">-</td>`
+            : `<td class="total-cell">${fmt(tot)}</td>`;
+
+        return `
+            <tr>
+                <td class="item-name" title="${esc(item)}">${esc(item)}</td>
+                ${rowVals}
+                ${totCell}
+            </tr>`;
+    }).join('');
+
     tfoot.innerHTML = `
         <tr>
-            <td class="col-name">Total</td>
-            ${foundItems.map(it => `<td class="num">${fmt(state.totals[it.key] || 0)}</td>`).join('')}
-            <td class="num">${fmt(state.grandTotal)}</td>
+            <td class="item-name">Total</td>
+            ${EMPLOYEES.map(emp => {
+                const v = state.empTotals[emp] || 0;
+                return isZero(v) ? `<td class="dash">-</td>` : `<td>${fmt(v)}</td>`;
+            }).join('')}
+            <td>${isZero(state.grandTotal) ? '-' : fmt(state.grandTotal)}</td>
         </tr>`;
 
-    // البطاقات الإحصائية
     const stats = document.getElementById('stats');
+    const itemsFound = ITEMS.length - state.missingItems.length;
+    const empsFound = EMPLOYEES.length - state.missingEmployees.length;
     stats.innerHTML = `
         <div class="stat">
-            <div class="label">عدد الموظفين</div>
-            <div class="value">${fmt(state.rows.length)}</div>
+            <div class="label">الأصناف</div>
+            <div class="value">${fmt(itemsFound)} / ${fmt(ITEMS.length)}</div>
         </div>
-        ${foundItems.map(it => `
         <div class="stat">
-            <div class="label">${esc(it.pretty)}</div>
-            <div class="value">${fmt(state.totals[it.key] || 0)}</div>
-        </div>`).join('')}
+            <div class="label">الموظفون</div>
+            <div class="value">${fmt(empsFound)} / ${fmt(EMPLOYEES.length)}</div>
+        </div>
         <div class="stat">
             <div class="label">الإجمالي العام</div>
-            <div class="value">${fmt(state.grandTotal)}</div>
+            <div class="value">${isZero(state.grandTotal) ? '-' : fmt(state.grandTotal)}</div>
         </div>`;
     stats.style.display = 'flex';
 
-    // تحذير الوجبات المفقودة
     const warn = document.getElementById('warnBox');
-    if (missingItems.length){
+    const warnings = [];
+    if (state.missingItems.length){
+        warnings.push(`<b>أصناف غير موجودة في الملف (${state.missingItems.length}):</b> ${state.missingItems.map(esc).join('، ')}`);
+    }
+    if (state.missingEmployees.length){
+        warnings.push(`<b>موظفون غير موجودين في الملف (${state.missingEmployees.length}):</b> ${state.missingEmployees.map(esc).join('، ')}`);
+    }
+    if (warnings.length){
         warn.style.display = 'block';
-        warn.textContent = 'تنبيه: لم يتم العثور على الوجبات التالية داخل الملف: ' +
-            missingItems.map(it => it.pretty).join('، ');
+        warn.innerHTML = warnings.join('<br>');
     } else {
         warn.style.display = 'none';
     }
 
-    // التاريخ
     document.getElementById('printedText').textContent = 'Printed: ' + dateStamp();
-
-    // إظهار الجدول
     document.getElementById('emptyState').style.display = 'none';
-    document.getElementById('reportTable').style.display = 'table';
+    document.getElementById('tableWrap').style.display = 'block';
     document.getElementById('footnote').style.display = 'block';
 }
 
 /* =========================================================
-   تحميل ملف Excel (يبحث في كل الشيتات عن الأفضل)
+   تحميل ملف Excel
    ========================================================= */
 async function loadFile(file){
     try{
@@ -622,6 +926,7 @@ async function loadFile(file){
 
         for (const sheetName of wb.SheetNames){
             const ws = wb.Sheets[sheetName];
+            if (!ws) continue;
             const rows = XLSX.utils.sheet_to_json(ws, {
                 header: 1, raw: true, defval: '', blankrows: true
             });
@@ -629,11 +934,11 @@ async function loadFile(file){
             if (!bestSheet || header.score > bestSheet.header.score){
                 bestSheet = { name: sheetName, rows, header };
             }
-            if (header.score === TARGET_ITEMS.length) break;
+            if (header.score === ITEMS.length) break;
         }
 
         if (!bestSheet || bestSheet.header.score === 0){
-            throw new Error('لم يتم العثور على أعمدة الوجبات المطلوبة (7 up / pepsi) في أي شيت داخل الملف.');
+            throw new Error('لم يتم العثور على أعمدة الأصناف في أي شيت داخل الملف.');
         }
 
         buildReport(bestSheet.rows);
@@ -646,10 +951,10 @@ async function loadFile(file){
 }
 
 /* =========================================================
-   تصدير PDF
+   تصدير PDF — تكرار رأس الجدول + بدون كروت/بيانات وصفية
    ========================================================= */
 async function exportPDF(){
-    if (!state.rows.length){
+    if (!state.matrix || Object.keys(state.matrix).length === 0){
         alert('الرجاء تحميل ملف Excel أولاً.');
         return;
     }
@@ -658,38 +963,163 @@ async function exportPDF(){
     btn.disabled = true;
     btn.textContent = '⏳ جاري التصدير...';
 
-    const el = document.getElementById('reportArea');
-    const prevShadow = el.style.boxShadow;
-    const prevRadius = el.style.borderRadius;
-    el.style.boxShadow = 'none';
-    el.style.borderRadius = '0';
+    const report = document.getElementById('reportArea');
+    const wrap = document.getElementById('tableWrap');
+
+    const prevReportMaxWidth = report.style.maxWidth;
+    const prevReportWidth = report.style.width;
+    const prevWrapOverflow = wrap.style.overflow;
+    const prevWrapWidth = wrap.style.width;
+
+    report.classList.add('pdf-mode');
+    report.style.maxWidth = 'none';
+    report.style.width = 'max-content';
+    wrap.style.overflow = 'visible';
+    wrap.style.width = 'auto';
 
     try{
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('p', 'pt', 'a4');
+        // انتظار تطبيق تنسيقات pdf-mode قبل القياس
+        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
-        const canvas = await html2canvas(el, {
+        /* --- قياس المواضع في CSS px --- */
+        const reportRect = report.getBoundingClientRect();
+        const reportTop = reportRect.top;
+
+        const theadEl = document.querySelector('#reportTable thead');
+        const tbodyEl = document.querySelector('#reportTable tbody');
+        const tfootEl = document.querySelector('#reportTable tfoot');
+
+        const theadRect = theadEl.getBoundingClientRect();
+        const theadTopCss = theadRect.top - reportTop;
+        const theadBottomCss = theadRect.bottom - reportTop;
+
+        // حدود أسفل كل صف (بالنسبة لأعلى التقرير) + أسفل tfoot
+        const boundariesCss = [];
+        Array.from(tbodyEl.children).forEach(tr => {
+            const r = tr.getBoundingClientRect();
+            boundariesCss.push(r.bottom - reportTop);
+        });
+        const tfootRect = tfootEl.getBoundingClientRect();
+        boundariesCss.push(tfootRect.bottom - reportTop);
+
+        /* --- تحويل التقرير إلى صورة واحدة --- */
+        const canvas = await html2canvas(report, {
             scale: 2,
             backgroundColor: '#ffffff',
-            useCORS: true
+            useCORS: true,
+            allowTaint: true
         });
 
-        const imgData = canvas.toDataURL('image/jpeg', 0.98);
+        const cssWidth = report.offsetWidth;
+        const canvasPxPerCssPx = canvas.width / cssWidth;
+
+        const theadTop    = Math.round(theadTopCss * canvasPxPerCssPx);
+        const theadBottom = Math.round(theadBottomCss * canvasPxPerCssPx);
+        const theadHeight = theadBottom - theadTop;
+
+        const boundariesPx = boundariesCss.map(b => Math.round(b * canvasPxPerCssPx));
+        // آخر حد هو نهاية التقرير (يشمل الحاشية أسفل الجدول)
+        boundariesPx.push(canvas.height);
+        boundariesPx.sort((a, b) => a - b);
+
+        const totalContentBottom = canvas.height;
+
+        /* --- إعداد PDF أفقي --- */
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('l', 'pt', 'a4');
         const pdfW = pdf.internal.pageSize.getWidth();
         const pdfH = pdf.internal.pageSize.getHeight();
-        const imgH = (canvas.height * pdfW) / canvas.width;
+        const marginPt = 15;
+        const usableW = pdfW - 2 * marginPt;
+        const usableH = pdfH - 2 * marginPt;
 
-        let heightLeft = imgH;
-        let position = 0;
+        // مقدار النقاط (pt) لكل بكسل في الكانفس بناءً على تحجيم العرض
+        const ptPerCanvasPx = usableW / canvas.width;
+        // الحد الأقصى لارتفاع الصفحة في بكسلات الكانفس
+        const pageHeightPx = usableH / ptPerCanvasPx;
 
-        pdf.addImage(imgData, 'JPEG', 0, position, pdfW, imgH);
-        heightLeft -= pdfH;
+        /* --- تقسيم الصفحات على حدود الصفوف --- */
+        // الصفحة الأولى: رأس التقرير + thead + صفوف
+        let page1Bottom = theadBottom;
+        for (const b of boundariesPx){
+            if (b <= pageHeightPx) page1Bottom = b;
+            else break;
+        }
 
-        while (heightLeft > 0){
-            position = heightLeft - imgH;
-            pdf.addPage();
-            pdf.addImage(imgData, 'JPEG', 0, position, pdfW, imgH);
-            heightLeft -= pdfH;
+        // الصفحات التالية: thead + صفوف
+        const availRowsHeightPx = pageHeightPx - theadHeight;
+
+        const pageSlices = [];
+        pageSlices.push({ isFirst: true, bodyY1: 0, bodyY2: page1Bottom });
+
+        let cursor = page1Bottom;
+        let safety = 0;
+        while (cursor < totalContentBottom && safety < 200){
+            safety++;
+            const nextLimit = cursor + availRowsHeightPx;
+            let pageBottom = null;
+
+            for (const b of boundariesPx){
+                if (b > cursor && b <= nextLimit) pageBottom = b;
+            }
+            if (pageBottom === null){
+                // لا يوجد حد يدخل في المساحة — نأخذ الحد التالي لتجنب الحلقة اللانهائية
+                for (const b of boundariesPx){
+                    if (b > cursor){ pageBottom = b; break; }
+                }
+            }
+            if (pageBottom === null || pageBottom <= cursor) break;
+
+            pageSlices.push({
+                isFirst: false,
+                headerY1: theadTop,
+                headerY2: theadBottom,
+                bodyY1: cursor,
+                bodyY2: pageBottom
+            });
+            cursor = pageBottom;
+        }
+
+        /* --- رسم كل صفحة --- */
+        for (let i = 0; i < pageSlices.length; i++){
+            const slice = pageSlices[i];
+            if (i > 0) pdf.addPage();
+
+            const bodyHeight = slice.bodyY2 - slice.bodyY1;
+            const headerHeight = slice.isFirst ? 0 : (slice.headerY2 - slice.headerY1);
+            const totalHeight = headerHeight + bodyHeight;
+
+            const pageCanvas = document.createElement('canvas');
+            pageCanvas.width = canvas.width;
+            pageCanvas.height = totalHeight;
+
+            const ctx = pageCanvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+
+            let drawY = 0;
+
+            // في الصفحات التالية: نرسم رأس الجدول أولاً
+            if (!slice.isFirst){
+                ctx.drawImage(
+                    canvas,
+                    0, slice.headerY1, canvas.width, headerHeight,
+                    0, 0,             canvas.width, headerHeight
+                );
+                drawY += headerHeight;
+            }
+
+            // محتوى الصفحة (رأس التقرير + صفوف / صفوف فقط)
+            ctx.drawImage(
+                canvas,
+                0, slice.bodyY1, canvas.width, bodyHeight,
+                0, drawY,        canvas.width, bodyHeight
+            );
+
+            const imgData = pageCanvas.toDataURL('image/jpeg', 0.95);
+            const imgH = totalHeight * ptPerCanvasPx;
+
+            pdf.addImage(imgData, 'JPEG', marginPt, marginPt, usableW, imgH);
         }
 
         pdf.save(`Side_Items_By_Agent_${dateStamp()}.pdf`);
@@ -698,10 +1128,13 @@ async function exportPDF(){
         console.error(err);
         alert('حدث خطأ أثناء تصدير PDF:\n' + err.message);
     }finally{
-        el.style.boxShadow = prevShadow;
-        el.style.borderRadius = prevRadius;
+        report.classList.remove('pdf-mode');
+        report.style.maxWidth = prevReportMaxWidth;
+        report.style.width = prevReportWidth;
+        wrap.style.overflow = prevWrapOverflow;
+        wrap.style.width = prevWrapWidth;
         btn.disabled = false;
-        btn.textContent = '📄 تصدير PDF';
+        btn.textContent = '📄 تصدير PDF (أفقي)';
     }
 }
 
@@ -709,12 +1142,10 @@ async function exportPDF(){
    تصدير Excel
    ========================================================= */
 function exportXLSX(){
-    if (!state.rows.length){
+    if (!state.matrix || Object.keys(state.matrix).length === 0){
         alert('الرجاء تحميل ملف Excel أولاً.');
         return;
     }
-
-    const foundItems = state.items.filter(it => it.found);
 
     const aoa = [
         ['شركة نايف للأغذية'],
@@ -724,19 +1155,25 @@ function exportXLSX(){
         ['Period', state.period || ''],
         ['Printed', dateStamp()],
         [],
-        ['Employee', ...foundItems.map(it => it.pretty), 'Total'],
-        ...state.rows.map(r => [
-            r.display,
-            ...foundItems.map(it => r.values[it.key] || 0),
-            r.total
+        ['Item \\ Employee', ...EMPLOYEES, 'Total'],
+        ...ITEMS.map(item => [
+            item,
+            ...EMPLOYEES.map(emp => {
+                const v = state.matrix[item][emp] || 0;
+                return isZero(v) ? '-' : v;
+            }),
+            isZero(state.itemTotals[item]) ? '-' : (state.itemTotals[item] || 0)
         ]),
-        ['Total', ...foundItems.map(it => state.totals[it.key] || 0), state.grandTotal]
+        ['Total', ...EMPLOYEES.map(emp => {
+            const v = state.empTotals[emp] || 0;
+            return isZero(v) ? '-' : v;
+        }), isZero(state.grandTotal) ? '-' : state.grandTotal]
     ];
 
     const ws = XLSX.utils.aoa_to_sheet(aoa);
     ws['!cols'] = [
         { wch: 30 },
-        ...foundItems.map(() => ({ wch: 14 })),
+        ...EMPLOYEES.map(() => ({ wch: 14 })),
         { wch: 12 }
     ];
 
@@ -756,11 +1193,9 @@ document.getElementById('fileInput').addEventListener('change', e => {
 document.getElementById('btnPdf').addEventListener('click', exportPDF);
 document.getElementById('btnXlsx').addEventListener('click', exportXLSX);
 
-document.getElementById('logo').addEventListener('error', function(){
-    this.style.display = 'none';
-});
-
 document.getElementById('printedText').textContent = 'Printed: ' + dateStamp();
+
+loadLogo();
 </script>
 </body>
 </html>
