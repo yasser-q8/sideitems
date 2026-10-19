@@ -53,7 +53,6 @@
     .toolbar-section{display:flex; align-items:center; gap:8px;}
     .toolbar-divider{width:1px; height:36px; background:var(--line); margin:0 4px;}
 
-    /* ★ أزرار التصدير — تكبير + ترتيب أولاً */
     .btn{
         display:inline-flex; align-items:center; gap:8px;
         border:none; border-radius:10px; cursor:pointer;
@@ -69,7 +68,6 @@
     .btn-xls:hover:not(:disabled){background:#0c5e31; transform:translateY(-2px);}
     .btn .btn-emoji{font-size:1.15rem; line-height:1;}
 
-    /* زر تحميل Excel */
     .file-btn{
         display:inline-flex; align-items:center; gap:8px;
         background:var(--red); color:#fff;
@@ -82,7 +80,6 @@
     .file-btn:hover{background:var(--red-dark); transform:translateY(-2px);}
     .file-btn .icon{font-size:1.15rem; line-height:1;}
 
-    /* مجموعة الأزرار المقطعيّة */
     .segmented{display:inline-flex; background:#f1f2f4; border-radius:10px; padding:3px; gap:2px;}
     .segmented label{cursor:pointer; position:relative;}
     .segmented input{display:none;}
@@ -96,7 +93,6 @@
         box-shadow:0 1px 3px rgba(0,0,0,.1);
     }
 
-    /* زر تبديل الاتجاه */
     .orientation-btn{
         display:inline-flex; align-items:center; gap:8px;
         background:#fff; color:var(--ink);
@@ -261,7 +257,6 @@
         max-width: none !important;
     }
 
-    /* رأس التقرير — صغير جداً */
     .report.pdf-mode .report-head{
         padding-bottom: 4px !important;
         border-bottom: 2px solid var(--red) !important;
@@ -290,11 +285,9 @@
         margin-bottom: 0 !important;
     }
 
-    /* إخفاء الزوائد */
     .report.pdf-mode .meta-line{ display: none !important; }
     .report.pdf-mode .warn{ display: none !important; }
 
-    /* الجدول */
     .report.pdf-mode .table-wrap{
         margin-top: 4px !important;
         overflow: visible !important;
@@ -309,7 +302,6 @@
         min-width: 0 !important;
     }
 
-    /* رأس الجدول: نص صغير */
     .report.pdf-mode table.report-table thead th{
         font-size: 0.46rem !important;
         padding: 2px 1px !important;
@@ -329,13 +321,11 @@
         max-width: 34px !important;
     }
 
-    /* جسم الجدول */
     .report.pdf-mode table.report-table tbody td{
         font-size: 0.55rem;
         padding: 1px 1px !important;
     }
 
-    /* ★ الأرقام فقط أكبر بـ 10% ★ */
     .report.pdf-mode table.report-table tbody td.num,
     .report.pdf-mode table.report-table tbody td.total-cell{
         font-size: 0.61rem !important;
@@ -363,7 +353,6 @@
         position: static !important;
     }
 
-    /* الوضع المقلوب (الموظفون رأسي) */
     .report.pdf-mode table.report-table.transposed thead th:not(.item-header):not(.total-header){
         min-width: 24px !important;
         max-width: 26px !important;
@@ -465,7 +454,6 @@
 
 <!-- ===== شريط الأدوات ===== -->
 <div class="toolbar">
-    <!-- ★ 1) أزرار التصدير أولاً (تكبير + ترتيب قبل زر التحميل) -->
     <div class="toolbar-section export-section">
         <button id="btnPdf" class="btn btn-pdf"><span class="btn-emoji">📄</span> PDF</button>
         <button id="btnXlsx" class="btn btn-xls"><span class="btn-emoji">📊</span> Excel</button>
@@ -473,7 +461,6 @@
 
     <div class="toolbar-divider"></div>
 
-    <!-- 2) تصفية الأصناف -->
     <div class="toolbar-section">
         <div class="segmented" role="group" aria-label="تصفية الأصناف">
             <label class="active">
@@ -489,7 +476,6 @@
 
     <div class="toolbar-divider"></div>
 
-    <!-- 3) تبديل الاتجاه -->
     <div class="toolbar-section">
         <button id="btnOrientation" class="orientation-btn" title="اضغط لتبديل اتجاه العرض">
             <span class="ori-icon" id="oriIcon">⇅</span>
@@ -499,7 +485,6 @@
 
     <div class="toolbar-divider"></div>
 
-    <!-- 4) زر تحميل Excel -->
     <div class="toolbar-section">
         <label class="file-btn">
             <span class="icon">📂</span>
@@ -606,7 +591,7 @@ function loadLogo(){
 }
 
 /* =========================================================
-   الأصناف والموظفون
+   الأصناف والموظفون — أُضيف MAHMOUD MOHAMED KHIRAT
    ========================================================= */
 const ITEMS = [
     'Cheesy Fries','Chick Fries','COLE SLAW Large _Z','COLE SLAW Small _Z',
@@ -629,6 +614,7 @@ const EMPLOYEES = [
     'ibrahim gomaa eisa','ibrahim nagy ibrahim','KAREM RAFAT MAGHRABI',
     'KHALED AHMED HAMDI MAHHOUD GABALLA','MAHMOUD ELSAYED AHMED EISA',
     'MAHMOUD HAMDI MESBAH MOHAMMED','Mahmoud Najem',
+    'MAHMOUD MOHAMED KHIRAT',                 /* ★ الاسم الجديد */
     'Moawad Mohamed Ahmad Hassan','mohamed ahmed mohamed ahmed',
     'Mohamed Awad Abood','Mohammed Mohammed Abdulla','omar essam',
     'SALEM QURSHI MOHAMED','SAYED METAWE MAHMOUD'
@@ -647,7 +633,7 @@ const state = {
     missingItems: [],
     missingEmployees: [],
     filterMode: 'all',
-    orientation: 'employees-vertical'   // ★ الافتراضي
+    orientation: 'employees-vertical'
 };
 
 const EMPTY_HTML_DEFAULT = document.getElementById('emptyState').innerHTML;
@@ -901,7 +887,7 @@ function updateOrientationUI(){
 }
 
 /* =========================================================
-   عرض التقرير — بدون كروت إحصائية
+   عرض التقرير
    ========================================================= */
 function render(){
     const thead = document.querySelector('#reportTable thead');
@@ -939,8 +925,6 @@ function render(){
     } else {
         renderEmployeesVertical(thead, tbody, tfoot, visibleItems);
     }
-
-    /* ★ حُذفت كروت المجاميع بالكامل */
 
     const warnings = [];
     if (state.missingItems.length){
@@ -1042,7 +1026,7 @@ function renderEmployeesVertical(thead, tbody, tfoot, visibleItems){
 }
 
 /* =========================================================
-   تحميل ملف Excel — بدون عرض اسم الملف
+   تحميل ملف Excel
    ========================================================= */
 async function loadFile(file){
     try{
