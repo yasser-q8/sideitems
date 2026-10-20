@@ -8,7 +8,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 
 <style>
     :root{
@@ -21,45 +21,35 @@
         --line-soft:#f1f2f4;
         --bg:#f4f5f7;
         --card:#ffffff;
-        --ok:#10b981;
+        --green-soft:#ecfdf5;
+        --green-border:#10b981;
+        --amber-soft:#fffbeb;
+        --amber-border:#fcd34d;
     }
     *{box-sizing:border-box;}
     html{scroll-behavior:smooth;}
     body{
-        margin:0;
-        background:var(--bg);
-        color:var(--ink);
+        margin:0; background:var(--bg); color:var(--ink);
         font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        direction:rtl;
-        padding:24px 16px 140px;
-        -webkit-font-smoothing:antialiased;
-        min-height:100vh;
+        direction:rtl; padding:24px 16px 140px;
+        -webkit-font-smoothing:antialiased; min-height:100vh;
     }
 
-    /* ===================== شريط الأدوات ===================== */
     .toolbar{
-        max-width:1100px;
-        margin:0 auto 20px;
-        display:flex;
-        flex-wrap:wrap;
-        align-items:center;
-        gap:10px;
-        background:var(--card);
-        padding:12px 14px;
-        border-radius:14px;
-        box-shadow:0 4px 18px rgba(0,0,0,.06);
+        max-width:1100px; margin:0 auto 12px;
+        display:flex; flex-wrap:wrap; align-items:center; gap:10px;
+        background:var(--card); padding:12px 14px;
+        border-radius:14px; box-shadow:0 4px 18px rgba(0,0,0,.06);
         border:1px solid var(--line);
     }
     .toolbar-section{display:flex; align-items:center; gap:8px;}
-    .toolbar-divider{width:1px; height:36px; background:var(--line); margin:0 4px;}
+    .toolbar-section.export-section{margin-right:auto;}
 
     .btn{
         display:inline-flex; align-items:center; gap:8px;
         border:none; border-radius:10px; cursor:pointer;
         padding:13px 24px; font-size:.95rem; font-weight:800;
-        font-family:inherit; transition:.2s ease;
-        white-space:nowrap;
-        letter-spacing:.2px;
+        font-family:inherit; transition:.2s ease; white-space:nowrap;
     }
     .btn:disabled{opacity:.55; cursor:not-allowed; transform:none !important;}
     .btn-pdf{background:#1f2937; color:#fff; box-shadow:0 4px 14px rgba(31,41,55,.28);}
@@ -80,19 +70,49 @@
     .file-btn:hover{background:var(--red-dark); transform:translateY(-2px);}
     .file-btn .icon{font-size:1.15rem; line-height:1;}
 
+    .nav-tabs{
+        max-width:1100px; margin:0 auto 16px;
+        display:flex; gap:8px;
+        background:var(--card); padding:8px;
+        border-radius:14px; box-shadow:0 4px 18px rgba(0,0,0,.06);
+        border:1px solid var(--line); flex-wrap:wrap;
+    }
+    .nav-tab{
+        flex:1; min-width:140px;
+        padding:12px 16px; background:transparent;
+        border:none; border-radius:10px; cursor:pointer;
+        font-family:inherit; font-size:.88rem; font-weight:700;
+        color:var(--muted); transition:all .2s ease;
+        display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    }
+    .nav-tab:hover{background:#fafbfc; color:var(--ink);}
+    .nav-tab.active{background:var(--red); color:#fff; box-shadow:0 4px 12px rgba(200,16,46,.28);}
+    .nav-tab .nav-count{
+        background:rgba(255,255,255,.25); padding:2px 8px;
+        border-radius:6px; font-size:.72rem; font-weight:700; direction:ltr;
+    }
+    .nav-tab.active .nav-count{background:rgba(255,255,255,.28);}
+    .nav-tab:not(.active) .nav-count{background:#f3f4f6; color:var(--ink);}
+
+    .page{display:none;}
+    .page.active{display:block;}
+
+    .report-toolbar{
+        max-width:1100px; margin:0 auto 12px;
+        display:flex; flex-wrap:wrap; align-items:center; gap:10px;
+        background:var(--card); padding:10px 14px;
+        border-radius:14px; box-shadow:0 4px 18px rgba(0,0,0,.06);
+        border:1px solid var(--line);
+    }
     .segmented{display:inline-flex; background:#f1f2f4; border-radius:10px; padding:3px; gap:2px;}
-    .segmented label{cursor:pointer; position:relative;}
-    .segmented input{display:none;}
-    .segmented span{
+    .seg-btn{
         display:block; padding:8px 16px; border-radius:8px;
         font-size:.82rem; font-weight:700; color:var(--muted);
-        transition:all .18s ease; white-space:nowrap;
+        background:transparent; border:none; cursor:pointer;
+        font-family:inherit; transition:all .18s ease; white-space:nowrap;
     }
-    .segmented input:checked + span{
-        background:#fff; color:var(--red);
-        box-shadow:0 1px 3px rgba(0,0,0,.1);
-    }
-
+    .seg-btn:hover:not(.active){color:var(--ink);}
+    .seg-btn.active{background:#fff; color:var(--red); box-shadow:0 1px 3px rgba(0,0,0,.1);}
     .orientation-btn{
         display:inline-flex; align-items:center; gap:8px;
         background:#fff; color:var(--ink);
@@ -105,14 +125,12 @@
     .orientation-btn .ori-icon{font-size:1.05rem; display:inline-block; transition:transform .3s ease;}
     .orientation-btn:hover .ori-icon{transform:rotate(180deg);}
 
-    /* ===================== البطاقة الأساسية ===================== */
     .report{
         max-width:1100px; margin:0 auto; background:var(--card);
         border:1px solid #eceef1; border-radius:16px;
         box-shadow:0 10px 34px rgba(0,0,0,.07);
         padding:26px 28px 30px;
     }
-
     .report-head{
         display:flex; justify-content:space-between; align-items:flex-start;
         gap:20px; padding-bottom:16px; border-bottom:3px solid var(--red);
@@ -128,20 +146,15 @@
     .meta{text-align:left; direction:ltr; font-size:.74rem; color:var(--muted); line-height:1.7;}
     .meta .title{font-size:.98rem; font-weight:800; color:var(--ink); margin-bottom:3px;}
 
-    /* ===================== الجدول ===================== */
     .table-wrap{
-        margin-top:16px;
-        overflow-x:auto; overflow-y:visible;
-        border:1px solid var(--line); border-radius:11px;
-        background:#fff; max-height:none;
+        margin-top:16px; overflow-x:auto; overflow-y:visible;
+        border:1px solid var(--line); border-radius:11px; background:#fff;
     }
-
     table.report-table{
         border-collapse:separate; border-spacing:0;
         width:max-content; min-width:100%;
         font-size:0.76rem; direction:rtl;
     }
-
     table.report-table thead th{
         background:var(--red); color:#fff; font-weight:700;
         font-size:0.64rem; line-height:1.25;
@@ -163,7 +176,6 @@
     table.report-table thead th.total-header{
         background:var(--red-dark); min-width:58px; max-width:58px;
     }
-
     table.report-table tbody td{
         padding:7px 5px; text-align:center;
         border-bottom:1px solid var(--line-soft);
@@ -181,14 +193,11 @@
     table.report-table tbody tr:nth-child(even) td.item-name{background:#fafbfc;}
     table.report-table tbody tr:hover{background:#fdf1f3;}
     table.report-table tbody tr:hover td.item-name{background:#fdf1f3;}
-
     table.report-table tbody td.total-cell{
         font-weight:700; color:var(--red); background:#fff9fa;
     }
     table.report-table tbody tr:nth-child(even) td.total-cell{background:#fdf3f5;}
-
     table.report-table td.dash{color:#c3c7ce; font-weight:400;}
-
     table.report-table tfoot td{
         padding:10px 5px; font-weight:800; text-align:center;
         background:var(--red-soft); color:var(--red-dark);
@@ -204,36 +213,27 @@
         min-width:180px; max-width:180px;
     }
     table.report-table tfoot td.dash{color:#b9848f; font-weight:700;}
-
-    /* الوضع المقلوب (الموظفون رأسي) */
     table.report-table.transposed thead th:not(.item-header):not(.total-header){
         min-width:72px; max-width:85px;
         font-size:0.58rem; padding:8px 4px;
     }
-    table.report-table.transposed thead th.item-header{
-        min-width:220px; max-width:240px;
-    }
+    table.report-table.transposed thead th.item-header{min-width:220px; max-width:240px;}
     table.report-table.transposed tbody td.item-name{
         min-width:220px; max-width:240px;
         font-size:0.68rem;
         white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
-    table.report-table.transposed tfoot td.item-name{
-        min-width:220px; max-width:240px;
-    }
+    table.report-table.transposed tfoot td.item-name{min-width:220px; max-width:240px;}
 
-    /* ===================== الحاشية والتحذيرات ===================== */
     .footnote{
         margin-top:16px; font-size:.72rem; color:var(--muted);
         border-top:1px dashed var(--line);
         padding-top:12px; line-height:1.85;
     }
-    .warn{
-        margin-top:14px; padding:11px 14px; border-radius:10px;
-        background:#fff7ed; border:1px solid #fed7aa;
-        color:#9a3412; font-size:.78rem; font-weight:600; line-height:1.7;
+    .footnote .filter-hint{
+        display:inline-block; background:#eef2ff; color:#3730a3;
+        padding:3px 10px; border-radius:6px; font-weight:700; margin:0 4px;
     }
-    .warn b{color:#7c2d12;}
 
     .empty{
         text-align:center; padding:60px 20px; color:var(--muted);
@@ -244,10 +244,128 @@
     }
     .empty .empty-icon{font-size:2.6rem; margin-bottom:12px; opacity:.4;}
     .empty b{display:block; color:var(--ink); font-size:1.02rem; margin-bottom:8px;}
+    .empty .empty-hint{margin-top:12px; color:var(--ink); font-size:.82rem;}
+    .empty .empty-action{
+        display:inline-block; margin-top:14px;
+        padding:10px 20px; background:var(--red); color:#fff;
+        border:none; border-radius:9px; cursor:pointer;
+        font-weight:700; font-size:.82rem; font-family:inherit;
+        transition:.2s ease;
+    }
+    .empty .empty-action:hover{background:var(--red-dark);}
 
-    /* ============================================================
-       ★★★ وضع PDF — صفحة واحدة + تكبير الأرقام فقط ★★★
-       ============================================================ */
+    .select-page{
+        max-width:1100px; margin:0 auto; background:var(--card);
+        border:1px solid #eceef1; border-radius:16px;
+        box-shadow:0 10px 34px rgba(0,0,0,.07);
+        padding:20px 24px 24px;
+    }
+    .select-page-head{
+        display:flex; justify-content:space-between; align-items:center;
+        gap:12px; padding-bottom:14px; margin-bottom:16px;
+        border-bottom:3px solid var(--red); flex-wrap:wrap;
+    }
+    .select-page-head > div:first-child{flex:1; min-width:200px;}
+    .select-page-head h2{
+        margin:0; font-size:1.15rem; color:var(--red); font-weight:800;
+        display:flex; align-items:center; gap:8px;
+    }
+    .select-page-head p{
+        margin:6px 0 0; font-size:.76rem; color:var(--muted); font-weight:500; line-height:1.6;
+    }
+    .select-count-badge{
+        padding:8px 16px; background:#f3f4f6; border-radius:10px;
+        font-size:.88rem; font-weight:700; color:var(--ink); direction:rtl;
+        display:inline-flex; align-items:center; gap:8px; white-space:nowrap;
+    }
+    .select-count-badge strong{color:var(--red); font-size:1rem;}
+    .select-count-badge .badge-extra{
+        color:#92400e; background:var(--amber-soft);
+        border:1px solid var(--amber-border);
+        padding:2px 8px; border-radius:6px; font-size:.72rem;
+    }
+
+    .select-header{
+        display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+        margin-bottom:14px;
+    }
+    .select-search{
+        flex:1; min-width:220px; padding:12px 16px;
+        border:1px solid var(--line); border-radius:10px;
+        font-size:.9rem; font-family:inherit; color:var(--ink);
+        background:#fff; transition:.2s ease; direction:rtl;
+    }
+    .select-search:focus{
+        outline:none; border-color:var(--red);
+        box-shadow:0 0 0 3px rgba(200,16,46,.1);
+    }
+    .select-search::placeholder{color:#9ca3af;}
+
+    .select-actions{display:flex; gap:8px; flex-wrap:wrap;}
+    .select-btn{
+        padding:10px 14px; border:1px solid var(--line);
+        border-radius:9px; background:#fff; cursor:pointer;
+        font-size:.82rem; font-weight:700; font-family:inherit;
+        color:var(--ink); transition:.2s ease;
+        display:inline-flex; align-items:center; gap:6px;
+        white-space:nowrap;
+    }
+    .select-btn:hover{border-color:var(--red); color:var(--red); background:#fffafa;}
+    .select-btn.select-all{border-color:var(--green-border); color:#065f46; background:var(--green-soft);}
+    .select-btn.select-all:hover{background:#d1fae5; border-color:#059669;}
+    .select-btn.deselect-all{border-color:#fca5a5; color:#991b1b; background:#fef2f2;}
+    .select-btn.deselect-all:hover{background:#fee2e2; border-color:#ef4444;}
+
+    .select-list{
+        max-height:62vh; overflow-y:auto;
+        border:1px solid var(--line); border-radius:12px; background:#fff;
+    }
+    .select-row{
+        display:flex; align-items:center; gap:14px;
+        padding:11px 16px; cursor:pointer;
+        border-bottom:1px solid #f3f4f6;
+        transition:background .15s ease, border-color .15s ease;
+        user-select:none;
+    }
+    .select-row:last-child{border-bottom:none;}
+    .select-row:hover{background:#fafbfc;}
+    .select-row.selected{background:var(--green-soft); border-right:4px solid var(--green-border);}
+    .select-row.selected:hover{background:#d1fae5;}
+    .select-row.selected .row-name{color:#065f46; font-weight:700;}
+    .select-row.selected .row-num{color:#059669; font-weight:700;}
+    .select-row.is-extra .row-name{color:#92400e;}
+    .select-row.is-extra.selected{background:#fef3c7; border-right-color:#f59e0b;}
+    .select-row.is-extra.selected:hover{background:#fde68a;}
+    .select-row input[type="checkbox"]{
+        width:20px; height:20px; cursor:pointer;
+        accent-color:var(--green-border); flex-shrink:0;
+    }
+    .select-row .row-num{
+        min-width:32px; font-size:.76rem; color:var(--muted);
+        font-weight:600; direction:ltr; text-align:center;
+    }
+    .select-row .row-name{
+        flex:1; font-size:.88rem; color:var(--ink); word-break:break-word;
+        display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+    }
+    .select-row .row-check{
+        color:var(--green-border); font-weight:900; font-size:1rem;
+        min-width:20px; text-align:center;
+    }
+    .select-row.is-extra.selected .row-check{color:#f59e0b;}
+
+    .tag-extra{
+        display:inline-block; padding:2px 8px; border-radius:6px;
+        font-size:.66rem; font-weight:800;
+        background:var(--amber-soft); color:#92400e;
+        border:1px solid var(--amber-border); letter-spacing:.2px;
+    }
+
+    .no-results{
+        padding:50px 20px; text-align:center;
+        color:var(--muted); font-size:.9rem;
+    }
+    .no-results .empty-icon{font-size:2.4rem; opacity:.4; margin-bottom:10px;}
 
     .report.pdf-mode{
         padding: 6px 8px 8px !important;
@@ -256,235 +374,150 @@
         width: max-content !important;
         max-width: none !important;
     }
-
     .report.pdf-mode .report-head{
         padding-bottom: 4px !important;
         border-bottom: 2px solid var(--red) !important;
-        gap: 8px !important;
-        margin-bottom: 2px;
+        gap: 8px !important; margin-bottom: 2px;
     }
     .report.pdf-mode .brand{gap: 6px !important;}
     .report.pdf-mode .brand img{
-        width: 34px !important;
-        height: 34px !important;
-        padding: 2px !important;
-        border-radius: 5px !important;
+        width: 34px !important; height: 34px !important;
+        padding: 2px !important; border-radius: 5px !important;
         border: 1px solid #eee !important;
     }
-    .report.pdf-mode .brand h1{
-        font-size: 0.7rem !important;
-        line-height: 1.1 !important;
-    }
-    .report.pdf-mode .brand p{
-        font-size: 0.42rem !important;
-        margin-top: 1px !important;
-        letter-spacing: .2px !important;
-    }
-    .report.pdf-mode .meta .title{
-        font-size: 0.6rem !important;
-        margin-bottom: 0 !important;
-    }
-
+    .report.pdf-mode .brand h1{font-size: 0.7rem !important; line-height: 1.1 !important;}
+    .report.pdf-mode .brand p{font-size: 0.42rem !important; margin-top: 1px !important; letter-spacing: .2px !important;}
+    .report.pdf-mode .meta .title{font-size: 0.6rem !important; margin-bottom: 0 !important;}
     .report.pdf-mode .meta-line{ display: none !important; }
-    .report.pdf-mode .warn{ display: none !important; }
-
     .report.pdf-mode .table-wrap{
-        margin-top: 4px !important;
-        overflow: visible !important;
-        border: none !important;
-        border-radius: 0 !important;
+        margin-top: 4px !important; overflow: visible !important;
+        border: none !important; border-radius: 0 !important;
         width: auto !important;
     }
-
     .report.pdf-mode table.report-table{
         font-size: 0.55rem;
-        width: max-content !important;
-        min-width: 0 !important;
+        width: max-content !important; min-width: 0 !important;
     }
-
     .report.pdf-mode table.report-table thead th{
         font-size: 0.46rem !important;
         padding: 2px 1px !important;
-        min-width: 30px !important;
-        max-width: 34px !important;
-        min-height: 56px !important;
-        position: static !important;
+        min-width: 30px !important; max-width: 34px !important;
+        min-height: 56px !important; position: static !important;
     }
     .report.pdf-mode table.report-table thead th.item-header{
-        min-width: 100px !important;
-        max-width: 100px !important;
-        font-size: 0.5rem !important;
-        text-align: right !important;
+        min-width: 100px !important; max-width: 100px !important;
+        font-size: 0.5rem !important; text-align: right !important;
     }
     .report.pdf-mode table.report-table thead th.total-header{
-        min-width: 30px !important;
-        max-width: 34px !important;
+        min-width: 30px !important; max-width: 34px !important;
     }
-
-    .report.pdf-mode table.report-table tbody td{
-        font-size: 0.55rem;
-        padding: 1px 1px !important;
-    }
-
+    .report.pdf-mode table.report-table tbody td{font-size: 0.55rem; padding: 1px 1px !important;}
     .report.pdf-mode table.report-table tbody td.num,
-    .report.pdf-mode table.report-table tbody td.total-cell{
-        font-size: 0.61rem !important;
-    }
-
+    .report.pdf-mode table.report-table tbody td.total-cell{font-size: 0.61rem !important;}
     .report.pdf-mode table.report-table tbody td.item-name{
         font-size: 0.48rem !important;
-        min-width: 100px !important;
-        max-width: 100px !important;
+        min-width: 100px !important; max-width: 100px !important;
         padding: 1px 3px !important;
         position: static !important;
         white-space: nowrap !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
     }
-
-    .report.pdf-mode table.report-table tfoot td{
-        font-size: 0.61rem !important;
-        padding: 2px 1px !important;
-    }
+    .report.pdf-mode table.report-table tfoot td{font-size: 0.61rem !important; padding: 2px 1px !important;}
     .report.pdf-mode table.report-table tfoot td.item-name{
-        min-width: 100px !important;
-        max-width: 100px !important;
-        font-size: 0.48rem !important;
-        position: static !important;
+        min-width: 100px !important; max-width: 100px !important;
+        font-size: 0.48rem !important; position: static !important;
     }
-
     .report.pdf-mode table.report-table.transposed thead th:not(.item-header):not(.total-header){
-        min-width: 24px !important;
-        max-width: 26px !important;
-        font-size: 0.4rem !important;
-        padding: 2px 1px !important;
+        min-width: 24px !important; max-width: 26px !important;
+        font-size: 0.4rem !important; padding: 2px 1px !important;
         min-height: 62px !important;
     }
     .report.pdf-mode table.report-table.transposed thead th.item-header{
-        min-width: 100px !important;
-        max-width: 100px !important;
+        min-width: 100px !important; max-width: 100px !important;
         font-size: 0.46rem !important;
     }
     .report.pdf-mode table.report-table.transposed thead th.total-header{
-        min-width: 26px !important;
-        max-width: 28px !important;
+        min-width: 26px !important; max-width: 28px !important;
     }
-    .report.pdf-mode table.report-table.transposed tbody td{
-        font-size: 0.55rem;
-        padding: 1px 1px !important;
-    }
+    .report.pdf-mode table.report-table.transposed tbody td{font-size: 0.55rem; padding: 1px 1px !important;}
     .report.pdf-mode table.report-table.transposed tbody td.num,
-    .report.pdf-mode table.report-table.transposed tbody td.total-cell{
-        font-size: 0.61rem !important;
-    }
+    .report.pdf-mode table.report-table.transposed tbody td.total-cell{font-size: 0.61rem !important;}
     .report.pdf-mode table.report-table.transposed tbody td.item-name{
-        min-width: 100px !important;
-        max-width: 100px !important;
-        font-size: 0.46rem !important;
-        padding: 1px 3px !important;
+        min-width: 100px !important; max-width: 100px !important;
+        font-size: 0.46rem !important; padding: 1px 3px !important;
     }
-    .report.pdf-mode table.report-table.transposed tfoot td{
-        font-size: 0.61rem !important;
-    }
+    .report.pdf-mode table.report-table.transposed tfoot td{font-size: 0.61rem !important;}
     .report.pdf-mode table.report-table.transposed tfoot td.item-name{
-        min-width: 100px !important;
-        max-width: 100px !important;
+        min-width: 100px !important; max-width: 100px !important;
         font-size: 0.46rem !important;
     }
-
     .report.pdf-mode .footnote{
         font-size: 0.38rem !important;
-        padding-top: 3px !important;
-        margin-top: 3px !important;
-        line-height: 1.3 !important;
-        border-top-width: 1px !important;
+        padding-top: 3px !important; margin-top: 3px !important;
+        line-height: 1.3 !important; border-top-width: 1px !important;
     }
 
-    /* ===================== توقيع المطور ===================== */
     .signature-card{
         position:fixed; bottom:20px; left:20px;
         background:#ffffff; color:var(--red);
         border:1.5px solid var(--red); border-radius:6.375px;
         padding:7.875px 13.125px;
         font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        font-size:0.6rem; font-weight:600;
-        z-index:1000; transition:all .25s ease;
-        cursor:pointer; text-decoration:none; display:inline-block;
-        box-shadow:0 4px 14px rgba(200,16,46,.12);
+        font-size:0.6rem; font-weight:600; z-index:1000;
+        transition:all .25s ease; cursor:pointer; text-decoration:none;
+        display:inline-block; box-shadow:0 4px 14px rgba(200,16,46,.12);
     }
     .signature-card:hover{transform:scale(1.04); box-shadow:0 8px 20px rgba(200,16,46,.22);}
     .signature-card .name{font-size:0.7125rem; font-weight:700; margin-bottom:3.75px;}
     .signature-card .title{font-size:0.525rem; opacity:.9; font-weight:500;}
 
-    /* ===================== استجابة الجوال ===================== */
     @media (max-width:900px){
-        .toolbar-section.export-section{
-            width:100%;
-            justify-content:flex-start;
-        }
+        .toolbar-section.export-section{width:100%; justify-content:flex-start;}
+        .nav-tab{min-width:0; padding:10px 8px; font-size:.78rem;}
+        .nav-tab .nav-count{font-size:.66rem; padding:1px 6px;}
     }
     @media (max-width:768px){
         body{padding:16px 12px 130px;}
-        .toolbar{padding:10px;}
-        .toolbar-divider{display:none;}
+        .toolbar, .nav-tabs, .report-toolbar{padding:8px;}
         .signature-card{position:relative; bottom:auto; left:auto; margin:24px auto 0; width:fit-content;}
         .signature-card:hover{transform:none;}
-        .report{padding:18px 14px;}
+        .report, .select-page{padding:16px 12px;}
         .report-head{flex-direction:column;}
         .meta{text-align:right; direction:ltr;}
         .brand img{width:66px; height:66px;}
         .btn{padding:11px 18px; font-size:.88rem;}
         .file-btn{padding:11px 18px; font-size:.88rem;}
+        .select-page-head h2{font-size:1rem;}
+        .select-search{min-width:140px; padding:10px 12px;}
+        .select-btn{padding:8px 10px; font-size:.74rem;}
+        .select-row{padding:9px 12px; gap:10px;}
+        .select-row .row-name{font-size:.82rem;}
+        .select-list{max-height:55vh;}
     }
     @media (max-width:480px){
-        .segmented span{padding:6px 10px; font-size:.72rem;}
+        .seg-btn{padding:6px 10px; font-size:.72rem;}
         .orientation-btn{padding:8px 10px; font-size:.72rem;}
         .btn{padding:10px 14px; font-size:.82rem;}
         .file-btn{padding:10px 14px; font-size:.82rem;}
+        .nav-tab{padding:8px 6px; font-size:.72rem;}
+        .nav-tab .nav-count{display:none;}
     }
 
     @media print{
         body{background:#fff; padding:0;}
-        .toolbar, .signature-card{display:none !important;}
+        .toolbar, .nav-tabs, .report-toolbar, .signature-card{display:none !important;}
         .report{box-shadow:none; border:none; max-width:100%;}
     }
 </style>
 </head>
 <body>
 
-<!-- ===== شريط الأدوات ===== -->
 <div class="toolbar">
     <div class="toolbar-section export-section">
         <button id="btnPdf" class="btn btn-pdf"><span class="btn-emoji">📄</span> PDF</button>
         <button id="btnXlsx" class="btn btn-xls"><span class="btn-emoji">📊</span> Excel</button>
     </div>
-
-    <div class="toolbar-divider"></div>
-
-    <div class="toolbar-section">
-        <div class="segmented" role="group" aria-label="تصفية الأصناف">
-            <label class="active">
-                <input type="radio" name="itemFilter" value="all" checked>
-                <span>كل الأصناف</span>
-            </label>
-            <label>
-                <input type="radio" name="itemFilter" value="active">
-                <span>ذات حركة</span>
-            </label>
-        </div>
-    </div>
-
-    <div class="toolbar-divider"></div>
-
-    <div class="toolbar-section">
-        <button id="btnOrientation" class="orientation-btn" title="اضغط لتبديل اتجاه العرض">
-            <span class="ori-icon" id="oriIcon">⇅</span>
-            <span class="ori-label" id="oriLabel">الموظفون رأسي</span>
-        </button>
-    </div>
-
-    <div class="toolbar-divider"></div>
-
     <div class="toolbar-section">
         <label class="file-btn">
             <span class="icon">📂</span>
@@ -494,46 +527,120 @@
     </div>
 </div>
 
-<!-- ===== منطقة التقرير ===== -->
-<div class="report" id="reportArea">
-
-    <div class="report-head">
-        <div class="brand">
-            <img id="logo" alt="Naif Foods">
-            <div>
-                <h1>شركة نايف للأغذية</h1>
-                <p id="branchText">Kuwait - Naif Chicken</p>
-            </div>
-        </div>
-        <div class="meta">
-            <div class="title">Side Items By Agent</div>
-            <div class="meta-line">Operator: ALL</div>
-            <div class="meta-line">Subgroup: Appetizeer___Z</div>
-            <div class="meta-line" id="periodText">From — to —</div>
-            <div class="meta-line" id="printedText"></div>
-        </div>
-    </div>
-
-    <div class="empty" id="emptyState">
-        <div class="empty-icon">📋</div>
-        <b>لا توجد بيانات لعرضها</b>
-        قم بتحميل ملف Excel (xlsx / xlsm) لعرض التقرير المختصر.
-    </div>
-
-    <div class="table-wrap" id="tableWrap" style="display:none;">
-        <table class="report-table" id="reportTable">
-            <thead></thead>
-            <tbody></tbody>
-            <tfoot></tfoot>
-        </table>
-    </div>
-
-    <div class="warn" id="warnBox" style="display:none;"></div>
-
-    <div class="footnote" id="footnote" style="display:none;"></div>
+<div class="nav-tabs" role="tablist">
+    <button class="nav-tab active" data-page="report" role="tab">📊 التقرير</button>
+    <button class="nav-tab" data-page="items" role="tab">🍔 الأصناف <span class="nav-count" id="itemsNavCount">-/-</span></button>
+    <button class="nav-tab" data-page="employees" role="tab">👥 الموظفون <span class="nav-count" id="employeesNavCount">-/-</span></button>
 </div>
 
-<!-- ===== توقيع المطور ===== -->
+<div class="page active" id="page-report">
+    <div class="report-toolbar">
+        <div class="segmented" role="group" aria-label="تصفية الأصناف">
+            <button type="button" class="seg-btn active" data-filter="all">كل الأصناف</button>
+            <button type="button" class="seg-btn" data-filter="active">ذات حركة</button>
+        </div>
+        <button id="btnOrientation" class="orientation-btn" title="اضغط لتبديل اتجاه العرض">
+            <span class="ori-icon" id="oriIcon">⇅</span>
+            <span class="ori-label" id="oriLabel">الموظفون رأسي</span>
+        </button>
+    </div>
+
+    <div class="report" id="reportArea">
+        <div class="report-head">
+            <div class="brand">
+                <img id="logo" alt="Naif Foods">
+                <div>
+                    <h1>شركة نايف للأغذية</h1>
+                    <p id="branchText">Kuwait - Naif Chicken</p>
+                </div>
+            </div>
+            <div class="meta">
+                <div class="title">Side Items By Agent</div>
+                <div class="meta-line">Operator: ALL</div>
+                <div class="meta-line">Subgroup: Appetizeer___Z</div>
+                <div class="meta-line" id="periodText">From — to —</div>
+                <div class="meta-line" id="printedText"></div>
+            </div>
+        </div>
+
+        <div class="empty" id="emptyState">
+            <div class="empty-icon">📋</div>
+            <b>لا توجد بيانات لعرضها</b>
+            قم بتحميل ملف Excel (xlsx / xlsm) لعرض التقرير.
+        </div>
+
+        <div class="table-wrap" id="tableWrap" style="display:none;">
+            <table class="report-table" id="reportTable">
+                <thead></thead>
+                <tbody></tbody>
+                <tfoot></tfoot>
+            </table>
+        </div>
+
+        <div class="footnote" id="footnote" style="display:none;"></div>
+    </div>
+</div>
+
+<div class="page" id="page-items">
+    <div class="select-page">
+        <div class="select-page-head">
+            <div>
+                <h2>🍔 اختيار الأصناف</h2>
+                <p id="itemsSubtitle">الأصناف الافتراضية محددة تلقائياً. الأصناف الإضافية من الملف تظهر أولاً وغير محددة — اختر ما تريد إضافته.</p>
+            </div>
+            <div class="select-count-badge" id="itemsCountBadge">
+                <strong>0</strong> / 0 محدد
+            </div>
+        </div>
+
+        <div class="select-header">
+            <input type="text" id="itemsSearchInput" class="select-search" placeholder="🔍 ابحث بالحرف...">
+            <div class="select-actions">
+                <button class="select-btn select-all" id="itemsSelectAll">✓ تحديد الكل</button>
+                <button class="select-btn deselect-all" id="itemsDeselectAll">✗ إلغاء الكل</button>
+                <button class="select-btn" id="itemsInvert">⇄ عكس التحديد</button>
+            </div>
+        </div>
+
+        <div class="select-list" id="itemsSelectList">
+            <div class="no-results">
+                <div class="empty-icon">📁</div>
+                قم بتحميل ملف Excel أولاً لعرض الأصناف
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page" id="page-employees">
+    <div class="select-page">
+        <div class="select-page-head">
+            <div>
+                <h2>👥 اختيار الموظفين</h2>
+                <p id="employeesSubtitle">الموظفون الافتراضيون محددون تلقائياً. الموظفون الإضافيون من الملف يظهرون أولاً وغير محددين — اختر من تريد إضافته.</p>
+            </div>
+            <div class="select-count-badge" id="employeesCountBadge">
+                <strong>0</strong> / 0 محدد
+            </div>
+        </div>
+
+        <div class="select-header">
+            <input type="text" id="employeesSearchInput" class="select-search" placeholder="🔍 ابحث بالحرف...">
+            <div class="select-actions">
+                <button class="select-btn select-all" id="employeesSelectAll">✓ تحديد الكل</button>
+                <button class="select-btn deselect-all" id="employeesDeselectAll">✗ إلغاء الكل</button>
+                <button class="select-btn" id="employeesInvert">⇄ عكس التحديد</button>
+            </div>
+        </div>
+
+        <div class="select-list" id="employeesSelectList">
+            <div class="no-results">
+                <div class="empty-icon">📁</div>
+                قم بتحميل ملف Excel أولاً لعرض الموظفين
+            </div>
+        </div>
+    </div>
+</div>
+
 <a href="https://yasser-q8.github.io/myprofile/#" class="signature-card" target="_blank" rel="noopener noreferrer">
     <div class="name">Yasser Elkhateeb</div>
     <div class="title">مطور البرنامج 67011143</div>
@@ -591,9 +698,9 @@ function loadLogo(){
 }
 
 /* =========================================================
-   الأصناف والموظفون
+   القوائم الافتراضية
    ========================================================= */
-const ITEMS = [
+const DEFAULT_ITEMS = [
     'Cheesy Fries','Chick Fries','COLE SLAW Large _Z','COLE SLAW Small _Z',
     'Fattoush _Z','Hummus _Z','Large Barbecue Sauce','Large Cheddar Sauce',
     'Large Chilli Mayo Sauce','large dynamite garlic','Large Honey Mustard',
@@ -603,11 +710,13 @@ const ITEMS = [
     'Puri Bread_Z','Rocca Salad _Z','Tabbouleh _Z','XLarge Barbecue Sauce',
     'xlarge cheddar sauce','XLarge Chilli Mayo Sauce','XLarge Honey Mustard',
     'xlarge maboug sauce','xlarge mayo ketchup','xlarge mayonnaise sauce',
-    'XLarge Peri Peri Sauce','xlarge pink sauce','xlarge ranch sauce',
-    'xlarge spicy cheese sauce','xlarge sweet spicy sauce'
+    'XLarge Peri Peri Sauce','XLarge Pink Sauce','xlarge ranch sauce',
+    'xlarge spicy cheese sauce','xlarge sweet spicy sauce',
+    'Large French Garlic','XLarge French Garlic','Protein Salad - Z',
+    'Large Pink Sauce','RICE W MILK_Z','Sweet Corn'
 ];
 
-const EMPLOYEES = [
+const DEFAULT_EMPLOYEES = [
     'Ahmed Hassan','AHMED HELMI ABD EL MONEM EL','Ahmed rubi','Ahmed Sami',
     'AHMED SAMIR ALSAKA','Fayez Ibrahim Ashry','GAMAL MOHAMED AHMED',
     'Gamal Nasr Mohamed','HAMED ABDELKADER MOHAMED','HISHAM GALAL MOHAMED',
@@ -621,7 +730,7 @@ const EMPLOYEES = [
 ];
 
 /* =========================================================
-   الحالة — الافتراضي: الموظفون رأسي
+   الحالة
    ========================================================= */
 const state = {
     matrix: {},
@@ -630,10 +739,20 @@ const state = {
     grandTotal: 0,
     period: '',
     branch: '',
-    missingItems: [],
-    missingEmployees: [],
+    allItems: [],
+    allEmployees: [],
+    itemColumns: {},
+    employeeRows: {},
     filterMode: 'all',
-    orientation: 'employees-vertical'
+    orientation: 'employees-vertical',
+    activePage: 'report',
+    selectedItems: new Set(),
+    selectedEmployees: new Set(),
+    defaultItems: new Set(),
+    additionalItems: new Set(),
+    defaultEmployees: new Set(),
+    additionalEmployees: new Set(),
+    hasData: false
 };
 
 const EMPTY_HTML_DEFAULT = document.getElementById('emptyState').innerHTML;
@@ -641,8 +760,6 @@ const EMPTY_HTML_DEFAULT = document.getElementById('emptyState').innerHTML;
 /* =========================================================
    أدوات مساعدة
    ========================================================= */
-
-/* ★ normalize خاص بأسماء الموظفين */
 function normalize(v){
     return String(v ?? '')
         .replace(/\u00A0/g, ' ')
@@ -652,12 +769,6 @@ function normalize(v){
         .replace(/\s+/g, ' ')
         .toLowerCase();
 }
-
-/* ★★★ itemKey — مطابقة دقيقة لأسماء الأصناف ★★★
-   - لا يزيل علامة $
-   - يوحّد الشرطة السفلية _ إلى مسافة
-   - يزيل الشرطات/النقاط من الحدود فقط
-*/
 function itemKey(v){
     return String(v ?? '')
         .replace(/\u00A0/g, ' ')
@@ -668,7 +779,6 @@ function itemKey(v){
         .replace(/\s+/g, ' ')
         .toLowerCase();
 }
-
 function toNum(v){
     if (v === null || v === undefined || v === '') return 0;
     const n = Number(String(v).replace(/,/g, '').trim());
@@ -695,203 +805,199 @@ function isDateLike(v){
     if (/^[A-Za-z]{3,}\s+\d{1,2},?\s+\d{4}/.test(s)) return true;
     return false;
 }
+
 function getVisibleItems(){
+    let items = state.allItems.filter(it => state.selectedItems.has(it));
     if (state.filterMode === 'active'){
-        return ITEMS.filter(it => (state.itemTotals[it] || 0) > 0);
+        const activeEmps = getVisibleEmployees();
+        if (activeEmps.length === 0) return [];
+        items = items.filter(it => {
+            const row = state.matrix[it];
+            if (!row) return false;
+            return activeEmps.some(emp => (row[emp] || 0) > 0);
+        });
     }
-    return ITEMS;
+    return items;
 }
-
-/* =========================================================
-   مطابقة أسماء الموظفين (كما هي)
-   ========================================================= */
-const EMPLOYEE_DATA = EMPLOYEES.map(name => {
-    const normalized = normalize(name);
-    const words = normalized.split(' ').filter(Boolean);
-    return { name, normalized, words, set: new Set(words) };
-});
-function findBestEmployeeMatch(cellValue){
-    const n = normalize(cellValue);
-    if (!n) return null;
-    const nWords = n.split(' ').filter(Boolean);
-    if (!nWords.length) return null;
-    const nSet = new Set(nWords);
-
-    let bestKey = null, bestScore = 0;
-    for (const emp of EMPLOYEE_DATA){
-        let score = 0;
-        if (n === emp.normalized) score = 1000;
-        else {
-            const allTargetInCell = emp.words.every(w => nSet.has(w));
-            const allCellInTarget = nWords.every(w => emp.set.has(w));
-            if (allTargetInCell && allCellInTarget) score = 800;
-            else if (allTargetInCell) score = Math.max(100, 500 - (nWords.length - emp.words.length) * 10);
-            else if (allCellInTarget && nWords.length >= 2) score = Math.max(50, 300 - (emp.words.length - nWords.length) * 10);
-        }
-        if (score > bestScore){ bestScore = score; bestKey = emp.name; }
-    }
-    return bestKey;
+function getVisibleEmployees(){
+    return state.allEmployees.filter(emp => state.selectedEmployees.has(emp));
 }
-
-/* =========================================================
-   ★★★ البحث الدقيق عن أعمدة الأصناف ★★★
-   - يُرجع كل الأعمدة المطابقة لكل صنف (قد يكون أكثر من عمود)
-   - لا يوجد مطابقة تقريبية أو مضغوطة
-   ========================================================= */
-function findAllItemColumns(row){
-    const result = {};
-    const norm = row.map(cell => itemKey(cell));
-
-    ITEMS.forEach(it => {
-        const target = itemKey(it);
-        if (!target) return;
-        const cols = [];
-        for (let c = 0; c < norm.length; c++){
-            if (norm[c] && norm[c] === target) cols.push(c);
-        }
-        if (cols.length) result[it] = cols;
+function sortBySelection(items, selectedSet){
+    return [...items].sort((a, b) => {
+        const aSel = selectedSet.has(a) ? 1 : 0;
+        const bSel = selectedSet.has(b) ? 1 : 0;
+        return aSel - bSel;
     });
-    return result;
-}
-
-function findHeaderRow(rows){
-    let best = { idx: -1, allCols: {}, score: 0 };
-    for (let r = 0; r < rows.length; r++){
-        const allCols = findAllItemColumns(rows[r] || []);
-        const score = Object.keys(allCols).length;
-        if (score > best.score){
-            best = { idx: r, allCols, score };
-        }
-        if (score === ITEMS.length) break;
-    }
-    return best;
-}
-
-/* ★ عند وجود أكثر من عمود مطابق لنفس الصنف (مثل عمود بـ $ فارغ وعمود بدون $ به بيانات)
-   نختار العمود الذي يحتوي على أكبر قدر من البيانات الرقمية */
-function pickBestColumn(rows, headerIdx, candidates){
-    if (candidates.length === 1) return candidates[0];
-    let bestCol = candidates[0];
-    let bestSum = -1;
-    for (const c of candidates){
-        let sum = 0;
-        for (let r = headerIdx + 1; r < rows.length; r++){
-            sum += Math.abs(toNum(rows[r][c]));
-        }
-        if (sum > bestSum){
-            bestSum = sum;
-            bestCol = c;
-        }
-    }
-    return bestCol;
 }
 
 /* =========================================================
-   تحديد عمود أسماء الموظفين (يتجاهل جميع أعمدة الأصناف)
+   اكتشاف صف الأصناف
    ========================================================= */
-function detectNameColumn(rows, headerRowIdx, usedCols){
-    const maxCols = Math.max(...rows.map(r => (r ? r.length : 0)), 0);
+function findHeaderRow(rows){
+    let best = { idx: -1, score: 0 };
+    for (let r = 0; r < rows.length; r++){
+        const row = rows[r] || [];
+        const normalized = row.map(cell => itemKey(cell));
+        let score = 0;
+        for (const item of DEFAULT_ITEMS){
+            const target = itemKey(item);
+            if (target && normalized.includes(target)) score++;
+        }
+        if (score > best.score) best = { idx: r, score };
+    }
+    if (best.score >= 3) return best;
 
-    let bestTargetCol = -1, bestTargetHits = 0;
-    let bestTextCol = -1, bestTextScore = 0;
+    let h = { idx: -1, score: 0 };
+    for (let r = 0; r < rows.length; r++){
+        const row = rows[r] || [];
+        let score = 0;
+        for (const cell of row){
+            if (typeof cell !== 'string') continue;
+            const s = cell.trim();
+            if (!s) continue;
+            if (s.startsWith('-') || s.startsWith('$')) score++;
+        }
+        if (score > h.score) h = { idx: r, score };
+    }
+    return h.idx !== -1 ? h : best;
+}
+
+function extractItemsFromHeader(headerRow, nameCol){
+    const items = [];
+    const itemCols = {};
+    for (let c = 0; c < headerRow.length; c++){
+        if (c === nameCol) continue;
+        const cell = headerRow[c];
+        if (cell === null || cell === undefined) continue;
+        const s = String(cell).trim();
+        if (!s) continue;
+        const lower = s.toLowerCase();
+        if (lower === 'total' || lower === 'grand total') continue;
+        if (lower === 'item' || lower === 'employee') continue;
+
+        if (!itemCols[s]){
+            items.push(s);
+            itemCols[s] = [c];
+        } else {
+            itemCols[s].push(c);
+        }
+    }
+    return { items, itemCols };
+}
+
+function extractEmployees(rows, headerIdx, nameCol){
+    const employees = [];
+    const employeeRows = {};
+    const seen = {};
+
+    for (let r = headerIdx + 1; r < rows.length; r++){
+        const row = rows[r];
+        if (!row) continue;
+        const cell = row[nameCol];
+        if (cell === null || cell === undefined) continue;
+        const s = String(cell).trim();
+        if (!s) continue;
+        const lower = s.toLowerCase();
+        if (lower === 'total' || lower === 'grand total' || lower.startsWith('total ')) continue;
+        if (!isNaN(Number(s))) continue;
+        if (isDateLike(s)) continue;
+
+        const key = normalize(s);
+        if (seen[key] !== undefined){
+            employeeRows[seen[key]].push(r);
+        } else {
+            seen[key] = s;
+            employees.push(s);
+            employeeRows[s] = [r];
+        }
+    }
+    return { employees, employeeRows };
+}
+
+function detectNameColumn(rows, headerIdx){
+    const maxCols = Math.max(...rows.map(r => (r ? r.length : 0)), 0);
+    let bestCol = -1;
+    let bestScore = -1;
 
     for (let c = 0; c < maxCols; c++){
-        if (usedCols.has(c)) continue;
-
-        let targetHits = 0, textCount = 0, totalCount = 0;
+        let textCount = 0;
         const uniqueTexts = new Set();
-
-        for (let r = headerRowIdx + 1; r < rows.length; r++){
+        for (let r = headerIdx + 1; r < rows.length; r++){
             const v = rows[r] ? rows[r][c] : '';
             if (v === '' || v === null || v === undefined) continue;
             const s = String(v).trim();
             if (!s) continue;
-            totalCount++;
             if (isDateLike(v)) continue;
             const lower = s.toLowerCase();
             if (lower === 'total' || lower === 'grand total' || lower.startsWith('total ')) continue;
             if (!isNaN(Number(s))) continue;
             textCount++;
             uniqueTexts.add(lower);
-            if (findBestEmployeeMatch(s)) targetHits++;
         }
-
-        if (targetHits > bestTargetHits){
-            bestTargetHits = targetHits;
-            bestTargetCol = c;
-        }
-        if (textCount > 0 && totalCount > 0){
-            const ratio = textCount / totalCount;
-            if (ratio >= 0.4){
-                const score = uniqueTexts.size * 10 + textCount;
-                if (score > bestTextScore){
-                    bestTextScore = score;
-                    bestTextCol = c;
-                }
-            }
-        }
+        const score = uniqueTexts.size * 10 + textCount;
+        if (score > bestScore){ bestScore = score; bestCol = c; }
     }
-    return bestTargetCol !== -1 ? bestTargetCol : bestTextCol;
+    return bestScore > 0 ? bestCol : -1;
 }
 
 /* =========================================================
-   بناء التقرير
+   معالجة الملف
    ========================================================= */
-function buildReport(rows){
-    const header = findHeaderRow(rows);
-    if (header.idx === -1 || header.score === 0){
-        throw new Error('لم يتم العثور على أعمدة الأصناف داخل الملف.');
+function processWorkbook(rows, headerIdx){
+    const nameCol = detectNameColumn(rows, headerIdx);
+    if (nameCol === -1){
+        throw new Error('لم يتم العثور على عمود أسماء الموظفين داخل الملف.');
     }
 
-    /* حلّ كل صنف إلى عمود واحد (وعند التعدد نختار الأكثر بيانات) */
-    const itemCols = {};
-    const usedCols = new Set();
-    Object.entries(header.allCols).forEach(([item, candidates]) => {
-        candidates.forEach(c => usedCols.add(c));
-        itemCols[item] = pickBestColumn(rows, header.idx, candidates);
+    const { items, itemCols } = extractItemsFromHeader(rows[headerIdx], nameCol);
+    if (items.length === 0){
+        throw new Error('لم يتم العثور على أي أصناف في صف العناوين.');
+    }
+
+    const { employees, employeeRows } = extractEmployees(rows, headerIdx, nameCol);
+    if (employees.length === 0){
+        throw new Error('لم يتم العثور على أي موظفين في الملف.');
+    }
+
+    const defaultItemsLookup = new Map();
+    DEFAULT_ITEMS.forEach(it => defaultItemsLookup.set(itemKey(it), it));
+    const defaultItemsFound = [];
+    const additionalItems = [];
+    items.forEach(fileItem => {
+        const key = itemKey(fileItem);
+        if (defaultItemsLookup.has(key)) defaultItemsFound.push(fileItem);
+        else additionalItems.push(fileItem);
     });
 
-    const nameCol = detectNameColumn(rows, header.idx, usedCols);
-    if (nameCol === -1) throw new Error('لم يتم العثور على عمود أسماء الموظفين داخل الملف.');
-
-    const employeeRows = {};
-    EMPLOYEES.forEach(emp => employeeRows[emp] = []);
-
-    for (let r = header.idx + 1; r < rows.length; r++){
-        const row = rows[r];
-        if (!row) continue;
-        const nameCell = row[nameCol];
-        if (nameCell === undefined || nameCell === null || nameCell === '') continue;
-        const s = String(nameCell).trim();
-        if (!s) continue;
-        const lower = s.toLowerCase();
-        if (lower === 'total' || lower === 'grand total') continue;
-        const matched = findBestEmployeeMatch(s);
-        if (matched) employeeRows[matched].push(r);
-    }
+    const defaultEmpLookup = new Map();
+    DEFAULT_EMPLOYEES.forEach(e => defaultEmpLookup.set(normalize(e), e));
+    const defaultEmpsFound = [];
+    const additionalEmps = [];
+    employees.forEach(fileEmp => {
+        const key = normalize(fileEmp);
+        if (defaultEmpLookup.has(key)) defaultEmpsFound.push(fileEmp);
+        else additionalEmps.push(fileEmp);
+    });
 
     const matrix = {};
-    ITEMS.forEach(item => {
-        matrix[item] = {};
-        const col = itemCols[item];
-        EMPLOYEES.forEach(emp => {
-            let sum = 0;
-            if (col !== undefined){
-                employeeRows[emp].forEach(r => sum += toNum(rows[r][col]));
-            }
-            matrix[item][emp] = sum;
-        });
-    });
-
     const itemTotals = {};
     const empTotals = {};
     let grandTotal = 0;
-    ITEMS.forEach(item => {
+
+    employees.forEach(emp => empTotals[emp] = 0);
+
+    items.forEach(item => {
+        matrix[item] = {};
         itemTotals[item] = 0;
-        EMPLOYEES.forEach(emp => {
-            const v = matrix[item][emp] || 0;
-            itemTotals[item] += v;
-            empTotals[emp] = (empTotals[emp] || 0) + v;
+        const cols = itemCols[item] || [];
+        employees.forEach(emp => {
+            let sum = 0;
+            employeeRows[emp].forEach(r => {
+                cols.forEach(c => { sum += toNum(rows[r][c]); });
+            });
+            matrix[item][emp] = sum;
+            itemTotals[item] += sum;
+            empTotals[emp] += sum;
         });
         grandTotal += itemTotals[item];
     });
@@ -906,14 +1012,26 @@ function buildReport(rows){
         }
     }
 
+    state.allItems = [...defaultItemsFound, ...additionalItems];
+    state.allEmployees = [...defaultEmpsFound, ...additionalEmps];
+
+    state.defaultItems = new Set(defaultItemsFound);
+    state.additionalItems = new Set(additionalItems);
+    state.defaultEmployees = new Set(defaultEmpsFound);
+    state.additionalEmployees = new Set(additionalEmps);
+
+    state.selectedItems = new Set(defaultItemsFound);
+    state.selectedEmployees = new Set(defaultEmpsFound);
+
     state.matrix = matrix;
     state.itemTotals = itemTotals;
     state.empTotals = empTotals;
     state.grandTotal = grandTotal;
+    state.itemColumns = itemCols;
+    state.employeeRows = employeeRows;
     state.period = period;
     state.branch = branch;
-    state.missingItems = ITEMS.filter(it => header.allCols[it] === undefined);
-    state.missingEmployees = EMPLOYEES.filter(emp => employeeRows[emp].length === 0);
+    state.hasData = true;
 
     if (period) document.getElementById('periodText').textContent = period;
     if (branch) document.getElementById('branchText').textContent = branch;
@@ -924,10 +1042,9 @@ function buildReport(rows){
    ========================================================= */
 function toggleOrientation(){
     state.orientation = state.orientation === 'items-vertical'
-        ? 'employees-vertical'
-        : 'items-vertical';
+        ? 'employees-vertical' : 'items-vertical';
     updateOrientationUI();
-    if (state.matrix && Object.keys(state.matrix).length) render();
+    if (state.hasData) render();
 }
 function updateOrientationUI(){
     const icon = document.getElementById('oriIcon');
@@ -941,6 +1058,205 @@ function updateOrientationUI(){
     }
 }
 
+function switchPage(page){
+    state.activePage = page;
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const target = document.getElementById('page-' + page);
+    if (target) target.classList.add('active');
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.page === page));
+    if (page === 'items') renderItemsSelection();
+    if (page === 'employees') renderEmployeesSelection();
+}
+
+/* =========================================================
+   صفحة اختيار الأصناف
+   ========================================================= */
+function renderItemsSelection(){
+    const list = document.getElementById('itemsSelectList');
+    const query = (document.getElementById('itemsSearchInput').value || '').trim().toLowerCase();
+
+    if (!state.hasData){
+        list.innerHTML = '<div class="no-results"><div class="empty-icon">📁</div>قم بتحميل ملف Excel أولاً لعرض الأصناف</div>';
+        updateItemsCountBadge();
+        updateNavCounts();
+        return;
+    }
+
+    const filtered = state.allItems.filter(it => !query || it.toLowerCase().includes(query));
+    const sorted = sortBySelection(filtered, state.selectedItems);
+
+    if (sorted.length === 0){
+        list.innerHTML = '<div class="no-results"><div class="empty-icon">🔍</div>لا توجد نتائج مطابقة للبحث</div>';
+    } else {
+        list.innerHTML = sorted.map((item, i) => {
+            const isSelected = state.selectedItems.has(item);
+            const isExtra = state.additionalItems.has(item);
+            const tag = isExtra ? '<span class="tag-extra">إضافي</span>' : '';
+            return `
+                <label class="select-row ${isSelected ? 'selected' : ''} ${isExtra ? 'is-extra' : ''}">
+                    <input type="checkbox" data-item="${esc(item)}" ${isSelected ? 'checked' : ''}>
+                    <span class="row-num">${i + 1}</span>
+                    <span class="row-name">${esc(item)} ${tag}</span>
+                    <span class="row-check">${isSelected ? '✓' : ''}</span>
+                </label>`;
+        }).join('');
+    }
+
+    updateItemsCountBadge();
+    updateNavCounts();
+}
+
+function updateItemsCountBadge(){
+    const el = document.getElementById('itemsCountBadge');
+    if (!el) return;
+    const total = state.allItems.length;
+    const sel = state.selectedItems.size;
+    const extra = state.additionalItems.size;
+    el.innerHTML = `<strong>${sel}</strong> / ${total} محدد` +
+        (extra > 0 ? ` <span class="badge-extra">${extra} إضافي متاح</span>` : '');
+}
+
+function bindItemsListEvents(){
+    const list = document.getElementById('itemsSelectList');
+
+    list.addEventListener('change', e => {
+        const cb = e.target;
+        if (!cb.matches('input[type="checkbox"]')) return;
+        const item = cb.dataset.item;
+        if (cb.checked) state.selectedItems.add(item);
+        else state.selectedItems.delete(item);
+        renderItemsSelection();
+        if (state.activePage === 'report') render();
+    });
+
+    document.getElementById('itemsSearchInput').addEventListener('input', renderItemsSelection);
+
+    document.getElementById('itemsSelectAll').addEventListener('click', () => {
+        const query = (document.getElementById('itemsSearchInput').value || '').trim().toLowerCase();
+        state.allItems.filter(it => !query || it.toLowerCase().includes(query))
+            .forEach(it => state.selectedItems.add(it));
+        renderItemsSelection();
+        if (state.activePage === 'report') render();
+    });
+    document.getElementById('itemsDeselectAll').addEventListener('click', () => {
+        const query = (document.getElementById('itemsSearchInput').value || '').trim().toLowerCase();
+        state.allItems.filter(it => !query || it.toLowerCase().includes(query))
+            .forEach(it => state.selectedItems.delete(it));
+        renderItemsSelection();
+        if (state.activePage === 'report') render();
+    });
+    document.getElementById('itemsInvert').addEventListener('click', () => {
+        const query = (document.getElementById('itemsSearchInput').value || '').trim().toLowerCase();
+        state.allItems.filter(it => !query || it.toLowerCase().includes(query))
+            .forEach(it => {
+                if (state.selectedItems.has(it)) state.selectedItems.delete(it);
+                else state.selectedItems.add(it);
+            });
+        renderItemsSelection();
+        if (state.activePage === 'report') render();
+    });
+}
+
+/* =========================================================
+   صفحة اختيار الموظفين
+   ========================================================= */
+function renderEmployeesSelection(){
+    const list = document.getElementById('employeesSelectList');
+    const query = (document.getElementById('employeesSearchInput').value || '').trim().toLowerCase();
+
+    if (!state.hasData){
+        list.innerHTML = '<div class="no-results"><div class="empty-icon">📁</div>قم بتحميل ملف Excel أولاً لعرض الموظفين</div>';
+        updateEmployeesCountBadge();
+        updateNavCounts();
+        return;
+    }
+
+    const filtered = state.allEmployees.filter(e => !query || e.toLowerCase().includes(query));
+    const sorted = sortBySelection(filtered, state.selectedEmployees);
+
+    if (sorted.length === 0){
+        list.innerHTML = '<div class="no-results"><div class="empty-icon">🔍</div>لا توجد نتائج مطابقة للبحث</div>';
+    } else {
+        list.innerHTML = sorted.map((emp, i) => {
+            const isSelected = state.selectedEmployees.has(emp);
+            const isExtra = state.additionalEmployees.has(emp);
+            const tag = isExtra ? '<span class="tag-extra">إضافي</span>' : '';
+            return `
+                <label class="select-row ${isSelected ? 'selected' : ''} ${isExtra ? 'is-extra' : ''}">
+                    <input type="checkbox" data-emp="${esc(emp)}" ${isSelected ? 'checked' : ''}>
+                    <span class="row-num">${i + 1}</span>
+                    <span class="row-name">${esc(emp)} ${tag}</span>
+                    <span class="row-check">${isSelected ? '✓' : ''}</span>
+                </label>`;
+        }).join('');
+    }
+
+    updateEmployeesCountBadge();
+    updateNavCounts();
+}
+
+function updateEmployeesCountBadge(){
+    const el = document.getElementById('employeesCountBadge');
+    if (!el) return;
+    const total = state.allEmployees.length;
+    const sel = state.selectedEmployees.size;
+    const extra = state.additionalEmployees.size;
+    el.innerHTML = `<strong>${sel}</strong> / ${total} محدد` +
+        (extra > 0 ? ` <span class="badge-extra">${extra} إضافي متاح</span>` : '');
+}
+
+function bindEmployeesListEvents(){
+    const list = document.getElementById('employeesSelectList');
+
+    list.addEventListener('change', e => {
+        const cb = e.target;
+        if (!cb.matches('input[type="checkbox"]')) return;
+        const emp = cb.dataset.emp;
+        if (cb.checked) state.selectedEmployees.add(emp);
+        else state.selectedEmployees.delete(emp);
+        renderEmployeesSelection();
+        if (state.activePage === 'report') render();
+    });
+
+    document.getElementById('employeesSearchInput').addEventListener('input', renderEmployeesSelection);
+
+    document.getElementById('employeesSelectAll').addEventListener('click', () => {
+        const query = (document.getElementById('employeesSearchInput').value || '').trim().toLowerCase();
+        state.allEmployees.filter(e => !query || e.toLowerCase().includes(query))
+            .forEach(e => state.selectedEmployees.add(e));
+        renderEmployeesSelection();
+        if (state.activePage === 'report') render();
+    });
+    document.getElementById('employeesDeselectAll').addEventListener('click', () => {
+        const query = (document.getElementById('employeesSearchInput').value || '').trim().toLowerCase();
+        state.allEmployees.filter(e => !query || e.toLowerCase().includes(query))
+            .forEach(e => state.selectedEmployees.delete(e));
+        renderEmployeesSelection();
+        if (state.activePage === 'report') render();
+    });
+    document.getElementById('employeesInvert').addEventListener('click', () => {
+        const query = (document.getElementById('employeesSearchInput').value || '').trim().toLowerCase();
+        state.allEmployees.filter(e => !query || e.toLowerCase().includes(query))
+            .forEach(e => {
+                if (state.selectedEmployees.has(e)) state.selectedEmployees.delete(e);
+                else state.selectedEmployees.add(e);
+            });
+        renderEmployeesSelection();
+        if (state.activePage === 'report') render();
+    });
+}
+
+function updateNavCounts(){
+    const itemsEl = document.getElementById('itemsNavCount');
+    const empsEl = document.getElementById('employeesNavCount');
+    if (itemsEl){
+        itemsEl.textContent = state.hasData ? `${state.selectedItems.size}/${state.allItems.length}` : '-/-';
+    }
+    if (empsEl){
+        empsEl.textContent = state.hasData ? `${state.selectedEmployees.size}/${state.allEmployees.length}` : '-/-';
+    }
+}
+
 /* =========================================================
    عرض التقرير
    ========================================================= */
@@ -950,25 +1266,44 @@ function render(){
     const tfoot = document.querySelector('#reportTable tfoot');
     const emptyEl = document.getElementById('emptyState');
     const tableWrap = document.getElementById('tableWrap');
-    const warn = document.getElementById('warnBox');
     const footnote = document.getElementById('footnote');
     const table = document.getElementById('reportTable');
 
-    if (!state.matrix || Object.keys(state.matrix).length === 0){
+    if (!state.hasData){
         emptyEl.innerHTML = EMPTY_HTML_DEFAULT;
         emptyEl.style.display = 'block';
         tableWrap.style.display = 'none';
-        warn.style.display = 'none';
         footnote.style.display = 'none';
         return;
     }
 
+    const visibleEmployees = getVisibleEmployees();
     const visibleItems = getVisibleItems();
-    if (visibleItems.length === 0){
-        emptyEl.innerHTML = '<div class="empty-icon">📋</div><b>لا توجد أصناف بها حركة</b>جميع الأصناف قيمتها صفر. اختر "كل الأصناف" لعرض الجميع.';
+
+    if (visibleEmployees.length === 0){
+        emptyEl.innerHTML = '<div class="empty-icon">👥</div><b>لم يتم تحديد أي موظفين</b>اذهب إلى تبويب "الموظفون" واختر الموظفين المطلوبين.';
         emptyEl.style.display = 'block';
         tableWrap.style.display = 'none';
-        warn.style.display = 'none';
+        footnote.style.display = 'none';
+        return;
+    }
+
+    if (visibleItems.length === 0){
+        if (state.filterMode === 'active'){
+            const selectedCount = state.allItems.filter(it => state.selectedItems.has(it)).length;
+            emptyEl.innerHTML = `
+                <div class="empty-icon">🔍</div>
+                <b>لا توجد أصناف ذات حركة</b>
+                <div class="empty-hint">
+                    ${selectedCount} صنف محدد، لكن جميع قيمها <b>صفر</b> للموظفين المحددين حالياً.
+                </div>
+                <button type="button" class="empty-action" onclick="setFilterMode('all')">عرض كل الأصناف</button>
+            `;
+        } else {
+            emptyEl.innerHTML = '<div class="empty-icon">🍔</div><b>لم يتم تحديد أي أصناف</b>اذهب إلى تبويب "الأصناف" واختر الأصناف المطلوبة.';
+        }
+        emptyEl.style.display = 'block';
+        tableWrap.style.display = 'none';
         footnote.style.display = 'none';
         return;
     }
@@ -976,25 +1311,17 @@ function render(){
     table.classList.toggle('transposed', state.orientation === 'employees-vertical');
 
     if (state.orientation === 'items-vertical'){
-        renderItemsVertical(thead, tbody, tfoot, visibleItems);
+        renderItemsVertical(thead, tbody, tfoot, visibleItems, visibleEmployees);
     } else {
-        renderEmployeesVertical(thead, tbody, tfoot, visibleItems);
+        renderEmployeesVertical(thead, tbody, tfoot, visibleItems, visibleEmployees);
     }
 
-    const warnings = [];
-    if (state.missingItems.length){
-        warnings.push(`<b>أصناف غير موجودة (${state.missingItems.length}):</b> ${state.missingItems.map(esc).join('، ')}`);
-    }
-    if (state.missingEmployees.length){
-        warnings.push(`<b>موظفون غير موجودين (${state.missingEmployees.length}):</b> ${state.missingEmployees.map(esc).join('، ')}`);
-    }
-    if (warnings.length){
-        warn.style.display = 'block';
-        warn.innerHTML = warnings.join('<br>');
-    } else warn.style.display = 'none';
+    const selectedItemsCount = state.allItems.filter(it => state.selectedItems.has(it)).length;
+    const hiddenByFilter = selectedItemsCount - visibleItems.length;
 
     const modeNote = state.filterMode === 'active'
-        ? 'وضع العرض: <b>الأصناف التي فيها حركة فقط</b>.'
+        ? `وضع العرض: <b>الأصناف التي فيها حركة فقط</b> (للموظفين المحددين).` +
+          (hiddenByFilter > 0 ? ` <span class="filter-hint">${hiddenByFilter} صنف مخفي</span>` : '')
         : 'وضع العرض: <b>كل الأصناف</b>.';
     const oriNote = state.orientation === 'items-vertical'
         ? 'الاتجاه: الأصناف رأسياً × الموظفين أفقياً.'
@@ -1010,20 +1337,21 @@ function render(){
     tableWrap.style.display = 'block';
 }
 
-function renderItemsVertical(thead, tbody, tfoot, visibleItems){
+function renderItemsVertical(thead, tbody, tfoot, visibleItems, visibleEmployees){
     thead.innerHTML = `
         <tr>
             <th class="item-header">Item \\ Employee</th>
-            ${EMPLOYEES.map(emp => `<th title="${esc(emp)}">${esc(emp)}</th>`).join('')}
+            ${visibleEmployees.map(emp => `<th title="${esc(emp)}">${esc(emp)}</th>`).join('')}
             <th class="total-header">Total</th>
         </tr>`;
 
     tbody.innerHTML = visibleItems.map(item => {
-        const rowVals = EMPLOYEES.map(emp => {
+        const rowVals = visibleEmployees.map(emp => {
             const v = state.matrix[item][emp] || 0;
             return isZero(v) ? `<td class="num dash">-</td>` : `<td class="num">${fmt(v)}</td>`;
         }).join('');
-        const tot = state.itemTotals[item] || 0;
+        let tot = 0;
+        visibleEmployees.forEach(emp => tot += (state.matrix[item][emp] || 0));
         const totCell = isZero(tot)
             ? `<td class="total-cell dash">-</td>`
             : `<td class="total-cell">${fmt(tot)}</td>`;
@@ -1034,18 +1362,22 @@ function renderItemsVertical(thead, tbody, tfoot, visibleItems){
         </tr>`;
     }).join('');
 
+    let shownGrandTotal = 0;
+    visibleItems.forEach(it => visibleEmployees.forEach(emp => shownGrandTotal += (state.matrix[it][emp] || 0)));
+
     tfoot.innerHTML = `
         <tr>
             <td class="item-name">Total</td>
-            ${EMPLOYEES.map(emp => {
-                const v = state.empTotals[emp] || 0;
+            ${visibleEmployees.map(emp => {
+                let v = 0;
+                visibleItems.forEach(it => v += (state.matrix[it][emp] || 0));
                 return isZero(v) ? `<td class="dash">-</td>` : `<td>${fmt(v)}</td>`;
             }).join('')}
-            <td>${isZero(state.grandTotal) ? '-' : fmt(state.grandTotal)}</td>
+            <td>${isZero(shownGrandTotal) ? '-' : fmt(shownGrandTotal)}</td>
         </tr>`;
 }
 
-function renderEmployeesVertical(thead, tbody, tfoot, visibleItems){
+function renderEmployeesVertical(thead, tbody, tfoot, visibleItems, visibleEmployees){
     thead.innerHTML = `
         <tr>
             <th class="item-header">Employee \\ Item</th>
@@ -1053,12 +1385,13 @@ function renderEmployeesVertical(thead, tbody, tfoot, visibleItems){
             <th class="total-header">Total</th>
         </tr>`;
 
-    tbody.innerHTML = EMPLOYEES.map(emp => {
+    tbody.innerHTML = visibleEmployees.map(emp => {
         const rowVals = visibleItems.map(it => {
             const v = state.matrix[it][emp] || 0;
             return isZero(v) ? `<td class="num dash">-</td>` : `<td class="num">${fmt(v)}</td>`;
         }).join('');
-        const tot = state.empTotals[emp] || 0;
+        let tot = 0;
+        visibleItems.forEach(it => tot += (state.matrix[it][emp] || 0));
         const totCell = isZero(tot)
             ? `<td class="total-cell dash">-</td>`
             : `<td class="total-cell">${fmt(tot)}</td>`;
@@ -1073,15 +1406,29 @@ function renderEmployeesVertical(thead, tbody, tfoot, visibleItems){
         <tr>
             <td class="item-name">Total</td>
             ${visibleItems.map(it => {
-                const v = state.itemTotals[it] || 0;
+                let v = 0;
+                visibleEmployees.forEach(emp => v += (state.matrix[it][emp] || 0));
                 return isZero(v) ? `<td class="dash">-</td>` : `<td>${fmt(v)}</td>`;
             }).join('')}
-            <td>${isZero(state.grandTotal) ? '-' : fmt(state.grandTotal)}</td>
+            <td>${(() => {
+                let s = 0;
+                visibleItems.forEach(it => visibleEmployees.forEach(emp => s += (state.matrix[it][emp] || 0)));
+                return isZero(s) ? '-' : fmt(s);
+            })()}</td>
         </tr>`;
 }
 
+function setFilterMode(mode){
+    state.filterMode = mode;
+    document.querySelectorAll('.seg-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.filter === mode);
+    });
+    render();
+}
+window.setFilterMode = setFilterMode;
+
 /* =========================================================
-   تحميل ملف Excel
+   تحميل الملف
    ========================================================= */
 async function loadFile(file){
     try{
@@ -1099,15 +1446,30 @@ async function loadFile(file){
             if (!bestSheet || header.score > bestSheet.header.score){
                 bestSheet = { name: sheetName, rows, header };
             }
-            if (header.score === ITEMS.length) break;
         }
 
-        if (!bestSheet || bestSheet.header.score === 0){
-            throw new Error('لم يتم العثور على أعمدة الأصناف في أي شيت داخل الملف.');
+        if (!bestSheet || bestSheet.header.idx === -1){
+            throw new Error('لم يتم العثور على صف الأصناف داخل أي شيت.');
         }
 
-        buildReport(bestSheet.rows);
+        processWorkbook(bestSheet.rows, bestSheet.header.idx);
+
         render();
+        renderItemsSelection();
+        renderEmployeesSelection();
+        updateNavCounts();
+        switchPage('report');
+
+        if (state.defaultItems.size === 0 || state.defaultEmployees.size === 0){
+            const parts = [];
+            if (state.defaultItems.size === 0){
+                parts.push(`لم يتم العثور على أي من الأصناف الافتراضية (${DEFAULT_ITEMS.length}) داخل الملف`);
+            }
+            if (state.defaultEmployees.size === 0){
+                parts.push(`لم يتم العثور على أي من الموظفين الافتراضيين (${DEFAULT_EMPLOYEES.length}) داخل الملف`);
+            }
+            alert('تنبيه:\n' + parts.join('\n') + '\n\nيمكنك تحديد ما تحتاجه يدوياً من تبويبَي "الأصناف" و"الموظفون".');
+        }
 
     }catch(err){
         console.error(err);
@@ -1116,17 +1478,20 @@ async function loadFile(file){
 }
 
 /* =========================================================
-   تصدير PDF — صفحة واحدة
+   تصدير PDF
    ========================================================= */
 async function exportPDF(){
-    if (!state.matrix || Object.keys(state.matrix).length === 0){
+    if (!state.hasData){
         alert('الرجاء تحميل ملف Excel أولاً.');
         return;
     }
-    if (getVisibleItems().length === 0){
-        alert('لا توجد أصناف للتصدير في وضع "الحركة". اختر "كل الأصناف".');
+    if (getVisibleItems().length === 0 || getVisibleEmployees().length === 0){
+        alert('لا توجد بيانات للتصدير. تأكد من تحديد الأصناف والموظفين.');
         return;
     }
+
+    const prevPage = state.activePage;
+    if (prevPage !== 'report') switchPage('report');
 
     const btn = document.getElementById('btnPdf');
     btn.disabled = true;
@@ -1188,80 +1553,268 @@ async function exportPDF(){
         wrap.style.width = prev.wrapWidth;
         btn.disabled = false;
         btn.innerHTML = '<span class="btn-emoji">📄</span> PDF';
+        if (prevPage !== 'report') switchPage(prevPage);
     }
 }
 
 /* =========================================================
-   تصدير Excel
+   ★ أدوات تنسيق Excel
+   ========================================================= */
+function getCellRef(row, col){
+    let letter = '';
+    let c = col;
+    while (c >= 0){
+        letter = String.fromCharCode((c % 26) + 65) + letter;
+        c = Math.floor(c / 26) - 1;
+    }
+    return letter + (row + 1);
+}
+
+/* ★ تنسيق الجدول مع محاذاة اسماء الموظفين لليسار */
+function applyExcelTableStyles(ws, headerRowIdx, lastDataRowIdx, lastColIdx){
+    /* ★ مجموعة أسماء الموظفين (بعد التطبيع) للمقارنة الدقيقة */
+    const employeeNameSet = new Set(state.allEmployees.map(normalize));
+
+    const thin  = { style: 'thin',  color: { rgb: '9CA3AF' } };
+    const thick = { style: 'thick', color: { rgb: '1F2937' } };
+    const blueFill = { patternType: 'solid', fgColor: { rgb: 'DCE9F9' } };
+    const center = { horizontal: 'center', vertical: 'center', wrapText: true };
+    const right  = { horizontal: 'right',  vertical: 'center', wrapText: true };
+    const left   = { horizontal: 'left',   vertical: 'center', wrapText: true };
+
+    for (let r = headerRowIdx; r <= lastDataRowIdx; r++){
+        for (let c = 0; c <= lastColIdx; c++){
+            const ref = getCellRef(r, c);
+            if (!ws[ref]) continue;
+
+            const isHeaderRow = r === headerRowIdx;
+            const isFirstCol  = c === 0;
+            const isLastCol   = c === lastColIdx;
+            const isLastRow   = r === lastDataRowIdx;
+
+            const border = {
+                top:    isHeaderRow ? thick : thin,
+                bottom: isLastRow   ? thick : thin,
+                left:   isFirstCol  ? thick : thin,
+                right:  isLastCol   ? thick : thin
+            };
+
+            /* ★ هل الخلية تحتوي اسم موظف؟ */
+            const cellValue = ws[ref].v;
+            const isEmpName = typeof cellValue === 'string'
+                              && employeeNameSet.has(normalize(cellValue));
+
+            let alignment;
+            if (isEmpName){
+                alignment = { ...left };   /* اسم الموظف → يسار */
+            } else if (isFirstCol){
+                alignment = { ...right };  /* العمود الأول (أسماء أصناف/إجمالي) → يمين */
+            } else {
+                alignment = { ...center }; /* الباقي → وسط */
+            }
+
+            const style = {
+                border,
+                alignment,
+                font: { name: 'Calibri', sz: 10 }
+            };
+
+            if (isHeaderRow){
+                const isTotalCol = c === lastColIdx;
+                if (!isTotalCol) style.fill = blueFill;
+                style.font.bold = true;
+                style.font.sz = 9;
+            } else if (isFirstCol && !isLastRow){
+                style.fill = blueFill;
+                style.font.bold = true;
+                style.font.sz = 10;
+            } else if (isLastCol || isLastRow){
+                style.font.bold = true;
+                style.font.sz = 10;
+            }
+
+            ws[ref].s = style;
+        }
+    }
+}
+
+/* =========================================================
+   ★ تصدير Excel — ارتفاع 30 + محاذاة يسار + Fit to page
    ========================================================= */
 function exportXLSX(){
-    if (!state.matrix || Object.keys(state.matrix).length === 0){
+    if (!state.hasData){
         alert('الرجاء تحميل ملف Excel أولاً.');
         return;
     }
     const visibleItems = getVisibleItems();
-    if (visibleItems.length === 0){
-        alert('لا توجد أصناف للتصدير في وضع "الحركة". اختر "كل الأصناف".');
+    const visibleEmployees = getVisibleEmployees();
+    if (visibleItems.length === 0 || visibleEmployees.length === 0){
+        alert('لا توجد بيانات للتصدير. تأكد من تحديد الأصناف والموظفين.');
         return;
     }
-
-    const oriLabel = state.orientation === 'items-vertical'
-        ? 'Items vertical / Employees horizontal'
-        : 'Employees vertical / Items horizontal';
-
-    const header = [
-        ['شركة نايف للأغذية'],
-        ['Side Items By Agent'],
-        ['Operator', 'ALL'],
-        ['Subgroup', 'Appetizeer___Z'],
-        ['Period', state.period || ''],
-        ['Printed', dateStamp()],
-        ['Filter', state.filterMode === 'active' ? 'Active items only' : 'All items'],
-        ['Orientation', oriLabel],
-        []
-    ];
 
     let bodyRows;
     if (state.orientation === 'items-vertical'){
         bodyRows = [
-            ['Item \\ Employee', ...EMPLOYEES, 'Total'],
+            ['Item \\ Employee', ...visibleEmployees, 'Total'],
             ...visibleItems.map(item => [
                 item,
-                ...EMPLOYEES.map(emp => {
+                ...visibleEmployees.map(emp => {
                     const v = state.matrix[item][emp] || 0;
                     return isZero(v) ? '-' : v;
                 }),
-                isZero(state.itemTotals[item]) ? '-' : (state.itemTotals[item] || 0)
+                (() => {
+                    let s = 0;
+                    visibleEmployees.forEach(emp => s += (state.matrix[item][emp] || 0));
+                    return isZero(s) ? '-' : s;
+                })()
             ]),
-            ['Total', ...EMPLOYEES.map(emp => {
-                const v = state.empTotals[emp] || 0;
-                return isZero(v) ? '-' : v;
-            }), isZero(state.grandTotal) ? '-' : state.grandTotal]
+            ['Total', ...visibleEmployees.map(emp => {
+                let s = 0;
+                visibleItems.forEach(it => s += (state.matrix[it][emp] || 0));
+                return isZero(s) ? '-' : s;
+            }), (() => {
+                let s = 0;
+                visibleItems.forEach(it => visibleEmployees.forEach(emp => s += (state.matrix[it][emp] || 0)));
+                return isZero(s) ? '-' : s;
+            })()]
         ];
     } else {
         bodyRows = [
             ['Employee \\ Item', ...visibleItems, 'Total'],
-            ...EMPLOYEES.map(emp => [
+            ...visibleEmployees.map(emp => [
                 emp,
                 ...visibleItems.map(it => {
                     const v = state.matrix[it][emp] || 0;
                     return isZero(v) ? '-' : v;
                 }),
-                isZero(state.empTotals[emp]) ? '-' : (state.empTotals[emp] || 0)
+                (() => {
+                    let s = 0;
+                    visibleItems.forEach(it => s += (state.matrix[it][emp] || 0));
+                    return isZero(s) ? '-' : s;
+                })()
             ]),
             ['Total', ...visibleItems.map(it => {
-                const v = state.itemTotals[it] || 0;
-                return isZero(v) ? '-' : v;
-            }), isZero(state.grandTotal) ? '-' : state.grandTotal]
+                let s = 0;
+                visibleEmployees.forEach(emp => s += (state.matrix[it][emp] || 0));
+                return isZero(s) ? '-' : s;
+            }), (() => {
+                let s = 0;
+                visibleItems.forEach(it => visibleEmployees.forEach(emp => s += (state.matrix[it][emp] || 0)));
+                return isZero(s) ? '-' : s;
+            })()]
         ];
     }
 
-    const aoa = [...header, ...bodyRows];
+    const numCols = bodyRows[0].length;
+    const lastColIdx = numCols - 1;
+
+    /* الجزء العلوي المبسّط */
+    const compStart = Math.min(1, lastColIdx);
+    const compEnd   = Math.min(compStart + 2, lastColIdx);
+    const repStart  = Math.min(compEnd + 1, lastColIdx);
+    const repEnd    = Math.min(repStart + 2, lastColIdx);
+    const dateStart = repEnd + 1;
+    const dateEnd   = lastColIdx;
+    const hasReport = repStart <= lastColIdx;
+    const hasDate   = dateStart <= lastColIdx;
+
+    const topRow = new Array(numCols).fill('');
+    if (compStart <= lastColIdx) topRow[compStart] = 'شركة نايف للأغذية';
+    if (hasReport) topRow[repStart] = 'Side Items By Agent';
+    if (hasDate)   topRow[dateStart] = 'Printed: ' + dateStamp();
+
+    const spacer = new Array(numCols).fill('');
+    const headerRowIdx = 2;
+    const aoa = [topRow, spacer, ...bodyRows];
     const ws = XLSX.utils.aoa_to_sheet(aoa);
-    if (state.orientation === 'items-vertical'){
-        ws['!cols'] = [{ wch: 30 }, ...EMPLOYEES.map(() => ({ wch: 14 })), { wch: 12 }];
-    } else {
-        ws['!cols'] = [{ wch: 30 }, ...visibleItems.map(() => ({ wch: 12 })), { wch: 12 }];
+
+    const lastDataRowIdx = headerRowIdx + bodyRows.length - 1;
+
+    /* دمجات الصف العلوي */
+    const merges = [];
+    if (compEnd >= compStart && compStart <= lastColIdx) merges.push({s:{r:0,c:compStart}, e:{r:0,c:compEnd}});
+    if (hasReport && repEnd >= repStart) merges.push({s:{r:0,c:repStart}, e:{r:0,c:repEnd}});
+    if (hasDate && dateEnd >= dateStart) merges.push({s:{r:0,c:dateStart}, e:{r:0,c:dateEnd}});
+    ws['!merges'] = merges;
+
+    /* عرض الأعمدة: أول 30، أصناف 7، Total 10 */
+    const cols = [{ wch: 30 }];
+    for (let i = 1; i < numCols - 1; i++) cols.push({ wch: 7 });
+    cols.push({ wch: 10 });
+    ws['!cols'] = cols;
+
+    /* ★ ارتفاعات الصفوف: صفوف البيانات = 30 */
+    const rowHeights = [];
+    rowHeights[0] = { hpt: 70 };            /* شعار + اسم شركة */
+    rowHeights[1] = { hpt: 4 };             /* فاصل */
+    rowHeights[headerRowIdx] = { hpt: 58 }; /* صف أسماء الأصناف */
+    for (let i = headerRowIdx + 1; i < aoa.length; i++){
+        rowHeights[i] = { hpt: 30 };        /* ★ صفوف البيانات = 30 */
+    }
+    ws['!rows'] = rowHeights;
+
+    /* ★★★ صفحة واحدة أفقية مع احتواء كل الأعمدة تلقائياً ★★★ */
+    ws['!pageSetup'] = {
+        paperSize: 9,                /* A4 */
+        orientation: 'landscape',
+        fitToWidth: 1,               /* كل الأعمدة في صفحة واحدة أفقياً */
+        fitToHeight: 0,              /* الارتفاع حسب المحتوى */
+        horizontalCentered: false,
+        verticalCentered: false
+    };
+    /* مفتاح تفعيل Fit-to-Page فعلياً في Excel */
+    ws['!sheetPr'] = {
+        pageSetUpPr: { fitToPage: true }
+    };
+    /* هوامش دقيقة جداً */
+    ws['!margins'] = {
+        left: 0.1, right: 0.1,
+        top: 0.1, bottom: 0.1,
+        header: 0, footer: 0
+    };
+
+    /* تنسيق الصف العلوي */
+    for (let c = 0; c <= lastColIdx; c++){
+        const ref = getCellRef(0, c);
+        if (!ws[ref]) ws[ref] = { t: 's', v: '' };
+        ws[ref].s = {
+            font: { name: 'Calibri', sz: 11 },
+            alignment: { horizontal: 'center', vertical: 'center' }
+        };
+    }
+    if (ws[getCellRef(0, compStart)]){
+        ws[getCellRef(0, compStart)].s = {
+            font: { name: 'Calibri', sz: 16, bold: true, color: { rgb: 'C8102E' } },
+            alignment: { horizontal: 'center', vertical: 'center' }
+        };
+    }
+    if (hasReport && ws[getCellRef(0, repStart)]){
+        ws[getCellRef(0, repStart)].s = {
+            font: { name: 'Calibri', sz: 13, bold: true, color: { rgb: '1F2937' } },
+            alignment: { horizontal: 'center', vertical: 'center' }
+        };
+    }
+    if (hasDate && ws[getCellRef(0, dateStart)]){
+        ws[getCellRef(0, dateStart)].s = {
+            font: { name: 'Calibri', sz: 11, bold: false, color: { rgb: '6B7280' } },
+            alignment: { horizontal: 'center', vertical: 'center' }
+        };
+    }
+
+    /* تطبيق تنسيق الجدول */
+    applyExcelTableStyles(ws, headerRowIdx, lastDataRowIdx, lastColIdx);
+
+    /* محاولة إضافة الشعار كصورة */
+    const logoEl = document.getElementById('logo');
+    if (logoEl && logoEl.src && logoEl.src.startsWith('data:')){
+        try {
+            ws['!images'] = [{
+                name: 'logo.png',
+                data: logoEl.src,
+                opts: { base64: true, x: 4, y: 4, w: 58, h: 58 }
+            }];
+        } catch(e){ /* تجاهل */ }
     }
 
     const wb = XLSX.utils.book_new();
@@ -1281,11 +1834,16 @@ document.getElementById('btnPdf').addEventListener('click', exportPDF);
 document.getElementById('btnXlsx').addEventListener('click', exportXLSX);
 document.getElementById('btnOrientation').addEventListener('click', toggleOrientation);
 
-document.querySelectorAll('input[name="itemFilter"]').forEach(inp => {
-    inp.addEventListener('change', () => {
-        document.querySelectorAll('.segmented label').forEach(l => l.classList.remove('active'));
-        inp.closest('label').classList.add('active');
-        state.filterMode = inp.value;
+document.querySelectorAll('.nav-tab').forEach(tab => {
+    tab.addEventListener('click', () => switchPage(tab.dataset.page));
+});
+
+document.querySelectorAll('.seg-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        if (btn.classList.contains('active')) return;
+        document.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.filterMode = btn.dataset.filter;
         render();
     });
 });
@@ -1293,6 +1851,11 @@ document.querySelectorAll('input[name="itemFilter"]').forEach(inp => {
 document.getElementById('printedText').textContent = 'Printed: ' + dateStamp();
 
 updateOrientationUI();
+updateNavCounts();
+bindItemsListEvents();
+bindEmployeesListEvents();
+renderItemsSelection();
+renderEmployeesSelection();
 loadLogo();
 </script>
 </body>
