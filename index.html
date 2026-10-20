@@ -591,7 +591,7 @@ function loadLogo(){
 }
 
 /* =========================================================
-   الأصناف والموظفون — أُضيف MAHMOUD MOHAMED KHIRAT
+   الأصناف والموظفون
    ========================================================= */
 const ITEMS = [
     'Cheesy Fries','Chick Fries','COLE SLAW Large _Z','COLE SLAW Small _Z',
@@ -614,7 +614,7 @@ const EMPLOYEES = [
     'ibrahim gomaa eisa','ibrahim nagy ibrahim','KAREM RAFAT MAGHRABI',
     'KHALED AHMED HAMDI MAHHOUD GABALLA','MAHMOUD ELSAYED AHMED EISA',
     'MAHMOUD HAMDI MESBAH MOHAMMED','Mahmoud Najem',
-    'MAHMOUD MOHAMED KHIRAT',                 /* ★ الاسم الجديد */
+    'MAHMOUD MOHAMED KHIRAT',
     'Moawad Mohamed Ahmad Hassan','mohamed ahmed mohamed ahmed',
     'Mohamed Awad Abood','Mohammed Mohammed Abdulla','omar essam',
     'SALEM QURSHI MOHAMED','SAYED METAWE MAHMOUD'
@@ -641,6 +641,8 @@ const EMPTY_HTML_DEFAULT = document.getElementById('emptyState').innerHTML;
 /* =========================================================
    أدوات مساعدة
    ========================================================= */
+
+/* ★ normalize خاص بأسماء الموظفين */
 function normalize(v){
     return String(v ?? '')
         .replace(/\u00A0/g, ' ')
@@ -650,6 +652,23 @@ function normalize(v){
         .replace(/\s+/g, ' ')
         .toLowerCase();
 }
+
+/* ★★★ itemKey — مطابقة دقيقة لأسماء الأصناف ★★★
+   - لا يزيل علامة $
+   - يوحّد الشرطة السفلية _ إلى مسافة
+   - يزيل الشرطات/النقاط من الحدود فقط
+*/
+function itemKey(v){
+    return String(v ?? '')
+        .replace(/\u00A0/g, ' ')
+        .trim()
+        .replace(/^[-–—•\s]+/, '')
+        .replace(/[-–—•\s]+$/, '')
+        .replace(/_/g, ' ')
+        .replace(/\s+/g, ' ')
+        .toLowerCase();
+}
+
 function toNum(v){
     if (v === null || v === undefined || v === '') return 0;
     const n = Number(String(v).replace(/,/g, '').trim());
@@ -684,7 +703,7 @@ function getVisibleItems(){
 }
 
 /* =========================================================
-   مطابقة أسماء الموظفين
+   مطابقة أسماء الموظفين (كما هي)
    ========================================================= */
 const EMPLOYEE_DATA = EMPLOYEES.map(name => {
     const normalized = normalize(name);
@@ -715,42 +734,70 @@ function findBestEmployeeMatch(cellValue){
 }
 
 /* =========================================================
-   البحث عن أعمدة الأصناف
+   ★★★ البحث الدقيق عن أعمدة الأصناف ★★★
+   - يُرجع كل الأعمدة المطابقة لكل صنف (قد يكون أكثر من عمود)
+   - لا يوجد مطابقة تقريبية أو مضغوطة
    ========================================================= */
-function findItemColumns(row){
-    const res = {};
-    const norm = row.map(cell => normalize(cell));
-    const comp = norm.map(n => n.replace(/[\s\-_]+/g, ''));
+function findAllItemColumns(row){
+    const result = {};
+    const norm = row.map(cell => itemKey(cell));
+
     ITEMS.forEach(it => {
-        const t  = normalize(it);
-        const tc = t.replace(/[\s\-_]+/g, '');
-        if (!tc) return;
-        let idx = norm.findIndex(n => n && n === t);
-        if (idx !== -1){ res[it] = idx; return; }
-        idx = comp.findIndex(n => n && n === tc);
-        if (idx !== -1) res[it] = idx;
+        const target = itemKey(it);
+        if (!target) return;
+        const cols = [];
+        for (let c = 0; c < norm.length; c++){
+            if (norm[c] && norm[c] === target) cols.push(c);
+        }
+        if (cols.length) result[it] = cols;
     });
-    return res;
+    return result;
 }
+
 function findHeaderRow(rows){
-    let best = { idx: -1, cols: {}, score: 0 };
+    let best = { idx: -1, allCols: {}, score: 0 };
     for (let r = 0; r < rows.length; r++){
-        const cols = findItemColumns(rows[r] || []);
-        const score = Object.keys(cols).length;
-        if (score > best.score) best = { idx: r, cols, score };
+        const allCols = findAllItemColumns(rows[r] || []);
+        const score = Object.keys(allCols).length;
+        if (score > best.score){
+            best = { idx: r, allCols, score };
+        }
         if (score === ITEMS.length) break;
     }
     return best;
 }
-function detectNameColumn(rows, headerRowIdx, itemCols){
-    const used = new Set(Object.values(itemCols));
+
+/* ★ عند وجود أكثر من عمود مطابق لنفس الصنف (مثل عمود بـ $ فارغ وعمود بدون $ به بيانات)
+   نختار العمود الذي يحتوي على أكبر قدر من البيانات الرقمية */
+function pickBestColumn(rows, headerIdx, candidates){
+    if (candidates.length === 1) return candidates[0];
+    let bestCol = candidates[0];
+    let bestSum = -1;
+    for (const c of candidates){
+        let sum = 0;
+        for (let r = headerIdx + 1; r < rows.length; r++){
+            sum += Math.abs(toNum(rows[r][c]));
+        }
+        if (sum > bestSum){
+            bestSum = sum;
+            bestCol = c;
+        }
+    }
+    return bestCol;
+}
+
+/* =========================================================
+   تحديد عمود أسماء الموظفين (يتجاهل جميع أعمدة الأصناف)
+   ========================================================= */
+function detectNameColumn(rows, headerRowIdx, usedCols){
     const maxCols = Math.max(...rows.map(r => (r ? r.length : 0)), 0);
 
     let bestTargetCol = -1, bestTargetHits = 0;
     let bestTextCol = -1, bestTextScore = 0;
 
     for (let c = 0; c < maxCols; c++){
-        if (used.has(c)) continue;
+        if (usedCols.has(c)) continue;
+
         let targetHits = 0, textCount = 0, totalCount = 0;
         const uniqueTexts = new Set();
 
@@ -795,8 +842,16 @@ function buildReport(rows){
     if (header.idx === -1 || header.score === 0){
         throw new Error('لم يتم العثور على أعمدة الأصناف داخل الملف.');
     }
-    const itemCols = header.cols;
-    const nameCol = detectNameColumn(rows, header.idx, itemCols);
+
+    /* حلّ كل صنف إلى عمود واحد (وعند التعدد نختار الأكثر بيانات) */
+    const itemCols = {};
+    const usedCols = new Set();
+    Object.entries(header.allCols).forEach(([item, candidates]) => {
+        candidates.forEach(c => usedCols.add(c));
+        itemCols[item] = pickBestColumn(rows, header.idx, candidates);
+    });
+
+    const nameCol = detectNameColumn(rows, header.idx, usedCols);
     if (nameCol === -1) throw new Error('لم يتم العثور على عمود أسماء الموظفين داخل الملف.');
 
     const employeeRows = {};
@@ -857,7 +912,7 @@ function buildReport(rows){
     state.grandTotal = grandTotal;
     state.period = period;
     state.branch = branch;
-    state.missingItems = ITEMS.filter(it => itemCols[it] === undefined);
+    state.missingItems = ITEMS.filter(it => header.allCols[it] === undefined);
     state.missingEmployees = EMPLOYEES.filter(emp => employeeRows[emp].length === 0);
 
     if (period) document.getElementById('periodText').textContent = period;
